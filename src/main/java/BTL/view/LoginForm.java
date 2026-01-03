@@ -4,7 +4,7 @@
  */
 package BTL.view;
 
-import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import java.awt.Color;
 import javax.swing.SwingUtilities;
 
@@ -19,7 +19,7 @@ public class LoginForm extends javax.swing.JFrame {
     
     public void setLogin(){
         btnLogin1.setBackground(new Color(77,120,204));
-        btnRegister1.setBackground(new Color(44,44,44));
+        btnRegister1.setBackground(new Color(255,255,255));
         if(login == null){
             login = new Login(this);
         }
@@ -30,7 +30,7 @@ public class LoginForm extends javax.swing.JFrame {
     
     public void setRegister(){
         btnRegister1.setBackground(new Color(77,120,204));
-        btnLogin1.setBackground(new Color(44,44,44));
+        btnLogin1.setBackground(new Color(255,255,255));
         if(register == null){
             register = new Register(this);
         }
@@ -62,18 +62,17 @@ public class LoginForm extends javax.swing.JFrame {
         setBackground(new java.awt.Color(30, 30, 30));
         setMinimumSize(new java.awt.Dimension(622, 471));
 
-        jPanel1.setBackground(new java.awt.Color(44, 44, 44));
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
-        jLabel1.setBackground(new java.awt.Color(64, 64, 64));
+        jLabel1.setBackground(new java.awt.Color(255, 255, 255));
         jLabel1.setFont(new java.awt.Font("Segoe UI Semibold", 0, 18)); // NOI18N
-        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("Welcome");
         jLabel1.setOpaque(true);
 
         btnLogin1.setBackground(new java.awt.Color(77, 120, 204));
         btnLogin1.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
-        btnLogin1.setForeground(new java.awt.Color(255, 255, 255));
         btnLogin1.setText("Log In");
         btnLogin1.setToolTipText("");
         btnLogin1.setBorderPainted(false);
@@ -84,9 +83,7 @@ public class LoginForm extends javax.swing.JFrame {
             }
         });
 
-        btnRegister1.setBackground(new java.awt.Color(44, 44, 44));
         btnRegister1.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
-        btnRegister1.setForeground(new java.awt.Color(255, 255, 255));
         btnRegister1.setText("Register");
         btnRegister1.setBorderPainted(false);
         btnRegister1.setPreferredSize(new java.awt.Dimension(0, 51));
@@ -100,13 +97,13 @@ public class LoginForm extends javax.swing.JFrame {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 196, Short.MAX_VALUE)
+            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(26, 26, 26)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(btnLogin1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnRegister1, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(26, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -119,7 +116,8 @@ public class LoginForm extends javax.swing.JFrame {
                 .addGap(0, 455, Short.MAX_VALUE))
         );
 
-        jplfill.setBackground(new java.awt.Color(30, 30, 30));
+        jplfill.setBackground(new java.awt.Color(255, 255, 255));
+        jplfill.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         jplfill.setPreferredSize(new java.awt.Dimension(578, 700));
         jplfill.setLayout(new java.awt.BorderLayout());
 
@@ -156,7 +154,7 @@ public class LoginForm extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        FlatDarkLaf.setup();
+        FlatLightLaf.setup();
         
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> new LoginForm().setVisible(true));

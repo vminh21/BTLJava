@@ -4,19 +4,88 @@
  */
 package BTL.view;
 
+import BTL.entity.Users;
+import com.formdev.flatlaf.FlatLightLaf;
+import java.awt.Color;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
 /**
  *
  * @author vanminh
  */
 public class MainForm extends javax.swing.JFrame {
     
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(MainForm.class.getName());
-
-    /**
-     * Creates new form MainForm
-     */
-    public MainForm() {
+    private Users user;
+    private HomePage homePage;
+    private StaffCRUD customerCRUD;
+    private SuppliersCRUD suppliersCRUD;
+    public MainForm(Users user) {
+        this.user = user;
         initComponents();
+        checkPermissions();
+        setHomePage();
+        this.setResizable(false);
+        this.setLocationRelativeTo(null);
+    }
+    private void showPanel(JPanel panel, JButton btn) {
+        resetbtn();
+        btn.setBackground(new Color(77, 120, 204));
+        jplfill2.removeAll();
+        jplfill2.add(panel);
+        jplfill2.revalidate();
+        jplfill2.repaint();
+    }
+    public void setHomePage(){
+        if(homePage == null){
+            homePage = new HomePage(this);
+        }
+        showPanel(homePage, btnTrangchu);
+    }
+    public void setcustomerCRUD(){
+        if(customerCRUD == null){
+            customerCRUD = new StaffCRUD(this);
+        }
+        showPanel(customerCRUD, btnStaff);
+    }
+    public void setsuppliersCRUD(){
+        if(suppliersCRUD == null){
+            suppliersCRUD = new SuppliersCRUD(this);
+        }
+        showPanel(suppliersCRUD, btnSuppliers);
+    }
+    private void checkPermissions() {
+        String role = user.getRole().trim();
+        String Name = user.getFullName().trim();
+        
+        System.out.println("DEBUG - Role hien tai: [" + role + "]");
+        
+        if (role.equalsIgnoreCase("staff")) {
+            txtName.setText(Name);
+            txtRole.setText(role);
+            btnStaff.setVisible(false);
+            btnSuppliers.setVisible(false);
+            btnBrands.setVisible(false);
+        } else if (role.equalsIgnoreCase("admin")) {
+            txtName.setText(Name);
+            txtRole.setText(role);
+            btnStaff.setEnabled(true);
+            btnSuppliers.setEnabled(true);
+            btnBrands.setEnabled(true);
+        }
+    }
+    public void resetbtn(){
+        btnTrangchu.setBackground(new Color(255,255,255));
+        btnCategory.setBackground(new Color(255,255,255));
+        btnProduct.setBackground(new Color(255,255,255));
+        btnBrands.setBackground(new Color(255,255,255));
+        btnStaff.setBackground(new Color(255,255,255));
+        btnOrder.setBackground(new Color(255,255,255));
+        btnNotification.setBackground(new Color(255,255,255));
+        btnSatistical.setBackground(new Color(255,255,255));
+        btnSuppliers.setBackground(new Color(255,255,255));
+        btnTk.setBackground(new Color(255,255,255));
     }
 
     /**
@@ -28,58 +97,226 @@ public class MainForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPanel1 = new javax.swing.JPanel();
+        btnTrangchu = new javax.swing.JButton();
+        btnProduct = new javax.swing.JButton();
+        btnCategory = new javax.swing.JButton();
+        btnOrder = new javax.swing.JButton();
+        btnStaff = new javax.swing.JButton();
+        btnNotification = new javax.swing.JButton();
+        btnSatistical = new javax.swing.JButton();
+        btnLogout = new javax.swing.JButton();
+        txtName = new javax.swing.JTextField();
+        txtRole = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
+        btnTk = new javax.swing.JButton();
+        btnSuppliers = new javax.swing.JButton();
+        btnBrands = new javax.swing.JButton();
+        jplfill2 = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setBackground(new java.awt.Color(255, 255, 255));
 
-        jLabel1.setText("hehe");
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel1.setForeground(new java.awt.Color(255, 255, 255));
+        jPanel1.setPreferredSize(new java.awt.Dimension(200, 600));
+
+        btnTrangchu.setText("Trang chủ");
+        btnTrangchu.setBorderPainted(false);
+        btnTrangchu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTrangchuActionPerformed(evt);
+            }
+        });
+
+        btnProduct.setText("Sản Phẩm");
+        btnProduct.setBorderPainted(false);
+
+        btnCategory.setText("Danh mục");
+        btnCategory.setBorderPainted(false);
+
+        btnOrder.setText("Hóa đơn");
+        btnOrder.setBorderPainted(false);
+
+        btnStaff.setText("Nhân viên");
+        btnStaff.setBorderPainted(false);
+        btnStaff.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnStaffActionPerformed(evt);
+            }
+        });
+
+        btnNotification.setText("Thông báo");
+        btnNotification.setBorderPainted(false);
+
+        btnSatistical.setText("Thống kê");
+        btnSatistical.setBorderPainted(false);
+
+        btnLogout.setText("Đăng xuất");
+        btnLogout.setBorderPainted(false);
+        btnLogout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLogoutActionPerformed(evt);
+            }
+        });
+
+        txtName.setEditable(false);
+        txtName.setBackground(new java.awt.Color(255, 255, 255));
+        txtName.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
+        txtName.setBorder(null);
+
+        txtRole.setEditable(false);
+        txtRole.setBackground(new java.awt.Color(255, 255, 255));
+        txtRole.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
+        txtRole.setForeground(new java.awt.Color(102, 102, 102));
+        txtRole.setBorder(null);
+
+        jLabel1.setBackground(new java.awt.Color(255, 255, 255));
+        jLabel1.setIcon(new javax.swing.ImageIcon("C:\\Users\\vanminh\\Documents\\NetBeansProjects\\study\\src\\icon\\man.png")); // NOI18N
+
+        btnTk.setText("Tài khoản");
+        btnTk.setBorderPainted(false);
+
+        btnSuppliers.setText("Nhà cung cấp");
+        btnSuppliers.setBorderPainted(false);
+        btnSuppliers.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSuppliersActionPerformed(evt);
+            }
+        });
+
+        btnBrands.setText("Thương hiệu");
+        btnBrands.setBorderPainted(false);
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(btnTrangchu, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnProduct, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnCategory, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnOrder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnStaff, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnLogout, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnTk, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnNotification, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnSatistical, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE)
+                    .addComponent(txtRole))
+                .addContainerGap())
+            .addComponent(btnBrands, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnSuppliers, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtRole, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnTrangchu, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnNotification, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnSatistical, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnStaff, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnSuppliers, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnBrands, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 36, Short.MAX_VALUE)
+                .addComponent(btnTk, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnLogout, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+
+        jplfill2.setBackground(new java.awt.Color(255, 255, 255));
+        jplfill2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jplfill2.setPreferredSize(new java.awt.Dimension(600, 600));
+        jplfill2.setLayout(new java.awt.BorderLayout());
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(158, 158, 158)
-                .addComponent(jLabel1)
-                .addContainerGap(216, Short.MAX_VALUE))
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(jplfill2, javax.swing.GroupLayout.PREFERRED_SIZE, 600, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(35, 35, 35)
-                .addComponent(jLabel1)
-                .addContainerGap(249, Short.MAX_VALUE))
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 560, Short.MAX_VALUE)
+            .addComponent(jplfill2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btnTrangchuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTrangchuActionPerformed
+        // TODO add your handling code here:
+        setHomePage();
+    }//GEN-LAST:event_btnTrangchuActionPerformed
+
+    private void btnStaffActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStaffActionPerformed
+        // TODO add your handling code here:
+        setcustomerCRUD();
+    }//GEN-LAST:event_btnStaffActionPerformed
+
+    private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
+        // TODO add your handling code here:
+        this.dispose();
+        new LoginForm().setVisible(true);
+    }//GEN-LAST:event_btnLogoutActionPerformed
+
+    private void btnSuppliersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSuppliersActionPerformed
+        // TODO add your handling code here:
+        setsuppliersCRUD();
+    }//GEN-LAST:event_btnSuppliersActionPerformed
+
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+        FlatLightLaf.setup();
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new MainForm().setVisible(true));
+        java.awt.EventQueue.invokeLater(() -> new MainForm(null).setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnBrands;
+    private javax.swing.JButton btnCategory;
+    private javax.swing.JButton btnLogout;
+    private javax.swing.JButton btnNotification;
+    private javax.swing.JButton btnOrder;
+    private javax.swing.JButton btnProduct;
+    private javax.swing.JButton btnSatistical;
+    private javax.swing.JButton btnStaff;
+    private javax.swing.JButton btnSuppliers;
+    private javax.swing.JButton btnTk;
+    private javax.swing.JButton btnTrangchu;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jplfill2;
+    private javax.swing.JTextField txtName;
+    private javax.swing.JTextField txtRole;
     // End of variables declaration//GEN-END:variables
 }

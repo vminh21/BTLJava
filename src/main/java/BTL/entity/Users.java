@@ -40,11 +40,15 @@ public class Users {
         this.userId = userId;
         this.fullName = fullName;
         this.email = email;
+        if (passwordHash == null || passwordHash.trim().isEmpty()) {
+        this.passwordHash = "123456abc";
+        } else {
         this.passwordHash = passwordHash;
+        }
         this.phoneNumber = phoneNumber;
         this.address = address;
         this.gender = gender;
-        this.role = "customer"; // Mặc định là khách hàng
+        this.role = "staff";
     }
 
     public int getUserId() {

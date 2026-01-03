@@ -77,75 +77,58 @@ public class Register extends javax.swing.JPanel {
         btnLogin2 = new javax.swing.JButton();
         rbtKhac = new javax.swing.JRadioButton();
 
-        setBackground(new java.awt.Color(30, 30, 30));
+        setBackground(new java.awt.Color(255, 255, 255));
         setForeground(new java.awt.Color(255, 255, 255));
         setPreferredSize(new java.awt.Dimension(578, 700));
 
         jLabel1.setFont(new java.awt.Font("Segoe UI Semibold", 0, 24)); // NOI18N
-        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("Register");
 
         jLabel2.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
-        jLabel2.setForeground(new java.awt.Color(255, 255, 255));
         jLabel2.setText("Name");
 
-        txtName.setBackground(new java.awt.Color(64, 64, 64));
         txtName.setPreferredSize(new java.awt.Dimension(0, 30));
 
         jLabel3.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
-        jLabel3.setForeground(new java.awt.Color(255, 255, 255));
         jLabel3.setText("Email");
 
-        txtEmail.setBackground(new java.awt.Color(64, 64, 64));
         txtEmail.setPreferredSize(new java.awt.Dimension(0, 30));
 
         jLabel4.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
-        jLabel4.setForeground(new java.awt.Color(255, 255, 255));
         jLabel4.setText("Phone");
 
-        txtPhone.setBackground(new java.awt.Color(64, 64, 64));
         txtPhone.setPreferredSize(new java.awt.Dimension(0, 30));
 
         jLabel5.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
-        jLabel5.setForeground(new java.awt.Color(255, 255, 255));
         jLabel5.setText("Address");
 
-        cbxAddress.setBackground(new java.awt.Color(64, 64, 64));
         cbxAddress.setPreferredSize(new java.awt.Dimension(0, 30));
 
         jLabel6.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
-        jLabel6.setForeground(new java.awt.Color(255, 255, 255));
         jLabel6.setText("Password");
 
-        txtPassword.setBackground(new java.awt.Color(64, 64, 64));
         txtPassword.setPreferredSize(new java.awt.Dimension(0, 30));
 
         jLabel7.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
-        jLabel7.setForeground(new java.awt.Color(255, 255, 255));
         jLabel7.setText("Confirm Password");
 
-        txtConfirmPassword.setBackground(new java.awt.Color(64, 64, 64));
         txtConfirmPassword.setPreferredSize(new java.awt.Dimension(0, 30));
 
         jLabel8.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
-        jLabel8.setForeground(new java.awt.Color(255, 255, 255));
         jLabel8.setText("Gender");
 
         buttonGroup8.add(rbtNam);
         rbtNam.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
-        rbtNam.setForeground(new java.awt.Color(255, 255, 255));
         rbtNam.setSelected(true);
         rbtNam.setText("Nam");
 
         buttonGroup8.add(rbtNu);
         rbtNu.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
-        rbtNu.setForeground(new java.awt.Color(255, 255, 255));
         rbtNu.setText("Nữ");
 
         btnRegister.setBackground(new java.awt.Color(204, 102, 0));
         btnRegister.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
-        btnRegister.setForeground(new java.awt.Color(255, 255, 255));
         btnRegister.setText("Register");
         btnRegister.setFocusPainted(false);
         btnRegister.setPreferredSize(new java.awt.Dimension(0, 30));
@@ -155,9 +138,7 @@ public class Register extends javax.swing.JPanel {
             }
         });
 
-        btnLogin2.setBackground(new java.awt.Color(64, 64, 64));
         btnLogin2.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
-        btnLogin2.setForeground(new java.awt.Color(255, 255, 255));
         btnLogin2.setText("Already Have an account? Log In");
         btnLogin2.setPreferredSize(new java.awt.Dimension(0, 30));
         btnLogin2.addActionListener(new java.awt.event.ActionListener() {
@@ -168,7 +149,6 @@ public class Register extends javax.swing.JPanel {
 
         buttonGroup8.add(rbtKhac);
         rbtKhac.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
-        rbtKhac.setForeground(new java.awt.Color(255, 255, 255));
         rbtKhac.setText("Khác");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -296,7 +276,7 @@ public class Register extends javax.swing.JPanel {
         JOptionPane.showMessageDialog(this, "Mật khẩu xác nhận không khớp!");
         return;
     }
-    // 4. Tạo đối tượng Users (Sử dụng hàm tạo rút gọn đã thảo luận)
+    // 4. Tạo đối tượng Users
     Users newUser = new Users(0,name, email, password, phone, address, gender);
     int result = usersDao.insert(newUser);
 

@@ -43,35 +43,28 @@ public class Login extends javax.swing.JPanel {
         btnLogin = new javax.swing.JButton();
         btnRegister2 = new javax.swing.JButton();
 
-        setBackground(new java.awt.Color(30, 30, 30));
+        setBackground(new java.awt.Color(255, 255, 255));
         setMinimumSize(new java.awt.Dimension(100, 100));
         setPreferredSize(new java.awt.Dimension(578, 700));
 
         jLabel1.setFont(new java.awt.Font("Segoe UI Semibold", 0, 24)); // NOI18N
-        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("Log In");
 
         jLabel2.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
-        jLabel2.setForeground(new java.awt.Color(255, 255, 255));
         jLabel2.setText("Email");
 
-        txtEmailLogin.setBackground(new java.awt.Color(64, 64, 64));
         txtEmailLogin.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
         txtEmailLogin.setPreferredSize(new java.awt.Dimension(64, 30));
 
         jLabel3.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
-        jLabel3.setForeground(new java.awt.Color(255, 255, 255));
         jLabel3.setText("Password");
 
-        txtPasswordLogin.setBackground(new java.awt.Color(64, 64, 64));
         txtPasswordLogin.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
         txtPasswordLogin.setPreferredSize(new java.awt.Dimension(64, 30));
 
-        jCheckBox1.setForeground(new java.awt.Color(255, 255, 255));
         jCheckBox1.setText("Remember me");
 
-        jLabel4.setForeground(new java.awt.Color(255, 255, 255));
         jLabel4.setText("Fogot password?");
 
         btnLogin.setBackground(new java.awt.Color(204, 102, 0));
@@ -85,9 +78,7 @@ public class Login extends javax.swing.JPanel {
             }
         });
 
-        btnRegister2.setBackground(new java.awt.Color(41, 41, 41));
         btnRegister2.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
-        btnRegister2.setForeground(new java.awt.Color(255, 255, 255));
         btnRegister2.setText("Do not have a account? Register");
         btnRegister2.setBorderPainted(false);
         btnRegister2.setPreferredSize(new java.awt.Dimension(0, 30));
@@ -150,50 +141,41 @@ public class Login extends javax.swing.JPanel {
     private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
         // TODO add your handling code here:
         // 1. Lấy dữ liệu từ giao diện
-    String email = txtEmailLogin.getText().trim();
-    String password = new String(txtPasswordLogin.getPassword());
+        String email = txtEmailLogin.getText().trim();
+        String password = new String(txtPasswordLogin.getPassword());
 
-    // 2. Kiểm tra để trống
-    if (email.isEmpty() || password.isEmpty()) {
-        JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ Email và Mật khẩu!");
-        return;
-    }
-
-    // 3. Gọi DAO để kiểm tra thông tin
-    UsersDao usersDao = new UsersDao();
-    Optional<Users> userOpt = usersDao.get(email);
-
-    // 4. Kiểm tra logic đăng nhập
-    if (userOpt.isPresent()) {
-        Users user = userOpt.get();
-        
-        // Kiểm tra mật khẩu (Lưu ý: Nếu anh có mã hóa pass thì phải dùng hàm check pass ở đây)
-        if (user.getPasswordHash().equals(password)) {
-            JOptionPane.showMessageDialog(this, "Đăng nhập thành công!");
-            
-            // 5. Phân quyền chuyển màn hình
-            String role = user.getRole();
-            if (role.equalsIgnoreCase("admin") || role.equalsIgnoreCase("staff")) {
-                // Nếu là Admin hoặc Staff thì mở trang quản trị
-                // new AdminDashboardForm().setVisible(true);
-                System.out.println("Mở màn hình Admin");
-            } else {
-                // Nếu là khách hàng thì mở trang chủ cửa hàng
-                 new MainForm().setVisible(true);
-                System.out.println("Mở màn hình Customer");
-            }
-            
-            // Đóng màn hình Login hiện tại
-            loginForm.dispose();
-            
-        } else {
-            JOptionPane.showMessageDialog(this, "Mật khẩu không chính xác!");
-            resetInput();
+        // 2. Kiểm tra để trống
+        if (email.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ Email và Mật khẩu!");
+            return;
         }
-    } else {
-        JOptionPane.showMessageDialog(this, "Email không tồn tại trong hệ thống!");
-        resetInput();
-    }
+
+        // 3. Gọi DAO để kiểm tra thông tin
+        UsersDao usersDao = new UsersDao();
+        Optional<Users> userOpt = usersDao.get(email);
+        
+        // 4. Kiểm tra logic đăng nhập
+        if (userOpt.isPresent()) {
+            Users user = userOpt.get();
+            System.out.println("User: " + user.getFullName() + " | Role trong DB: " + user.getRole());
+            if (user.getPasswordHash().equals(password)) {
+                JOptionPane.showMessageDialog(this, "Đăng nhập thành công với quyền: " + user.getRole());
+
+                // 5. Mở MainForm và truyền đối tượng user sang để phân quyền
+                MainForm main = new MainForm(user); 
+                main.setVisible(true);
+                loginForm.dispose(); 
+
+            } else {
+                JOptionPane.showMessageDialog(this, "Mật khẩu không chính xác!");
+                 resetInput(); 
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Email không tồn tại trong hệ thống!");
+                resetInput();
+        }
+        
+        
     }//GEN-LAST:event_btnLoginActionPerformed
 
 

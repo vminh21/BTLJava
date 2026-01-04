@@ -10,7 +10,13 @@ package BTL.view;
  */
 public class HomePage extends javax.swing.JPanel {
 
-    private final MainForm mainForm;
+    private MainForm mainForm;
+    private CustomersForm customersForm;
+    
+    public HomePage(CustomersForm customersForm) {
+        initComponents();
+        this.customersForm = customersForm;
+    }
     public HomePage(MainForm mainForm) {
         initComponents();
         this.mainForm = mainForm;

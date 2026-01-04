@@ -16,6 +16,7 @@ import javax.swing.JOptionPane;
 public class Login extends javax.swing.JPanel {
 
     private final LoginForm loginForm;
+    private boolean isPasswordShown = false;
     public Login(LoginForm loginForm) {
         initComponents();
         this.loginForm = loginForm;
@@ -39,9 +40,11 @@ public class Login extends javax.swing.JPanel {
         jLabel3 = new javax.swing.JLabel();
         txtPasswordLogin = new javax.swing.JPasswordField();
         jCheckBox1 = new javax.swing.JCheckBox();
-        jLabel4 = new javax.swing.JLabel();
+        lblForgotPassword = new javax.swing.JLabel();
         btnLogin = new javax.swing.JButton();
         btnRegister2 = new javax.swing.JButton();
+        jLabel4 = new javax.swing.JLabel();
+        lblShowPassword = new javax.swing.JLabel();
 
         setBackground(new java.awt.Color(255, 255, 255));
         setMinimumSize(new java.awt.Dimension(100, 100));
@@ -65,7 +68,12 @@ public class Login extends javax.swing.JPanel {
 
         jCheckBox1.setText("Remember me");
 
-        jLabel4.setText("Fogot password?");
+        lblForgotPassword.setText("Fogot password?");
+        lblForgotPassword.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblForgotPasswordMouseClicked(evt);
+            }
+        });
 
         btnLogin.setBackground(new java.awt.Color(204, 102, 0));
         btnLogin.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
@@ -88,17 +96,26 @@ public class Login extends javax.swing.JPanel {
             }
         });
 
+        jLabel4.setIcon(new javax.swing.ImageIcon("C:\\Users\\vanminh\\Documents\\NetBeansProjects\\study\\src\\icon\\user.png")); // NOI18N
+
+        lblShowPassword.setIcon(new javax.swing.ImageIcon("C:\\Users\\vanminh\\Documents\\NetBeansProjects\\study\\src\\icon\\khoaxanh.jpg")); // NOI18N
+        lblShowPassword.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblShowPasswordMouseClicked(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(148, Short.MAX_VALUE)
+                .addContainerGap(143, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jCheckBox1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel4))
+                        .addComponent(lblForgotPassword))
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(txtEmailLogin, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -106,7 +123,11 @@ public class Login extends javax.swing.JPanel {
                     .addComponent(txtPasswordLogin, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnLogin, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnRegister2, javax.swing.GroupLayout.PREFERRED_SIZE, 308, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(149, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblShowPassword, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(98, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -116,20 +137,24 @@ public class Login extends javax.swing.JPanel {
                 .addGap(18, 18, 18)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtEmailLogin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtEmailLogin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(jLabel3)
                 .addGap(18, 18, 18)
-                .addComponent(txtPasswordLogin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtPasswordLogin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblShowPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jCheckBox1)
-                    .addComponent(jLabel4))
+                    .addComponent(lblForgotPassword))
                 .addGap(18, 18, 18)
                 .addComponent(btnLogin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnRegister2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(285, Short.MAX_VALUE))
+                .addContainerGap(293, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -157,14 +182,23 @@ public class Login extends javax.swing.JPanel {
         // 4. Kiểm tra logic đăng nhập
         if (userOpt.isPresent()) {
             Users user = userOpt.get();
-            System.out.println("User: " + user.getFullName() + " | Role trong DB: " + user.getRole());
             if (user.getPasswordHash().equals(password)) {
-                JOptionPane.showMessageDialog(this, "Đăng nhập thành công với quyền: " + user.getRole());
+                JOptionPane.showMessageDialog(this, "Đăng nhập thành công!");
 
-                // 5. Mở MainForm và truyền đối tượng user sang để phân quyền
-                MainForm main = new MainForm(user); 
-                main.setVisible(true);
-                loginForm.dispose(); 
+                String role = user.getRole(); // Lấy role từ đối tượng user
+
+                // 5. Điều hướng theo Role
+                if (role.equalsIgnoreCase("customer")) {
+                    // Mở Form dành riêng cho khách hàng (ví dụ: CustomerMainForm)
+                    CustomersForm customerForm = new CustomersForm(user); 
+                    customerForm.setVisible(true);
+                } else {
+                    // Mở MainForm dành cho Quản lý (Admin/Staff)
+                    MainForm main = new MainForm(user); 
+                    main.setVisible(true);
+                }
+
+                loginForm.dispose(); // Đóng form Login
 
             } else {
                 JOptionPane.showMessageDialog(this, "Mật khẩu không chính xác!");
@@ -178,6 +212,28 @@ public class Login extends javax.swing.JPanel {
         
     }//GEN-LAST:event_btnLoginActionPerformed
 
+    private void lblForgotPasswordMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblForgotPasswordMouseClicked
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_lblForgotPasswordMouseClicked
+
+    private void lblShowPasswordMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblShowPasswordMouseClicked
+        // TODO add your handling code here:
+        if (isPasswordShown) {
+        // Nếu đang hiện -> Ẩn đi (dùng ký tự chấm tròn)
+        txtPasswordLogin.setEchoChar('•'); 
+        // Thay đổi icon sang hình "mắt nhắm" nếu anh có
+        // lblIcon.setIcon(new ImageIcon(getClass().getResource("/icons/eye_hide.png")));
+        isPasswordShown = false;
+    } else {
+        // Nếu đang ẩn -> Hiện ra (char 0 là không hiển thị ký tự thay thế)
+        txtPasswordLogin.setEchoChar((char) 0);
+        // Thay đổi icon sang hình "mắt mở"
+        // lblIcon.setIcon(new ImageIcon(getClass().getResource("/icons/eye_show.png")));
+        isPasswordShown = true;
+    }
+    }//GEN-LAST:event_lblShowPasswordMouseClicked
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnLogin;
@@ -187,6 +243,8 @@ public class Login extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel lblForgotPassword;
+    private javax.swing.JLabel lblShowPassword;
     private javax.swing.JTextField txtEmailLogin;
     private javax.swing.JPasswordField txtPasswordLogin;
     // End of variables declaration//GEN-END:variables

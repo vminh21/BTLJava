@@ -6,7 +6,9 @@ package BTL.view;
 
 import BTL.bussiness.UsersDao;
 import BTL.entity.Users;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
+import javax.swing.event.DocumentEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 
@@ -35,10 +37,10 @@ public class StaffCRUD extends javax.swing.JPanel {
         tblStaff.setRowSorter(rowSorter);
         
         // 3. Cài đặt ComboBox
-        cbxAddress.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { 
+        cbxAddress.setModel(new DefaultComboBoxModel<>(new String[] { 
             "Hà Nội", "TP.HCM", "Đà Nẵng", "Cần Thơ", "Hải Phòng", "Thanh Hóa" 
         }));
-        cbxSearch.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { 
+        cbxSearch.setModel(new DefaultComboBoxModel<>(new String[] { 
             "Tất cả", "Tên", "Email", "Số điện thoại" 
         }));
 
@@ -67,9 +69,9 @@ public class StaffCRUD extends javax.swing.JPanel {
 
     private void setupSearchEvent() {
         txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void insertUpdate(javax.swing.event.DocumentEvent e) { search(); }
-            public void removeUpdate(javax.swing.event.DocumentEvent e) { search(); }
-            public void changedUpdate(javax.swing.event.DocumentEvent e) { search(); }
+            public void insertUpdate(DocumentEvent e) { search(); }
+            public void removeUpdate(DocumentEvent e) { search(); }
+            public void changedUpdate(DocumentEvent e) { search(); }
             private void search() {
                 String text = txtSearch.getText();
                 if (text.trim().length() == 0) rowSorter.setRowFilter(null);
@@ -112,6 +114,7 @@ public class StaffCRUD extends javax.swing.JPanel {
 
         setPreferredSize(new java.awt.Dimension(600, 600));
 
+        tblStaff.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         tblStaff.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -162,6 +165,7 @@ public class StaffCRUD extends javax.swing.JPanel {
         rbtKhac.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         rbtKhac.setText("Khác");
 
+        btnThemNV.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
         btnThemNV.setText("Thêm");
         btnThemNV.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -169,6 +173,7 @@ public class StaffCRUD extends javax.swing.JPanel {
             }
         });
 
+        btnSuaNV.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
         btnSuaNV.setText("Sửa");
         btnSuaNV.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -176,6 +181,7 @@ public class StaffCRUD extends javax.swing.JPanel {
             }
         });
 
+        btnXoaNV.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
         btnXoaNV.setText("Xóa");
         btnXoaNV.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -183,6 +189,7 @@ public class StaffCRUD extends javax.swing.JPanel {
             }
         });
 
+        btnLamMoiNV.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
         btnLamMoiNV.setText("Làm mới");
         btnLamMoiNV.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -206,28 +213,24 @@ public class StaffCRUD extends javax.swing.JPanel {
                     .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(32, 32, 32)
-                        .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtPhone, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE)
-                            .addComponent(txtEmail))))
+                .addGap(32, 32, 32)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE)
+                    .addComponent(txtEmail)
+                    .addComponent(txtPhone))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(23, 23, 23)
-                        .addComponent(cbxAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(rbtNam)
                         .addGap(18, 18, 18)
                         .addComponent(rbtNu)
                         .addGap(18, 18, 18)
                         .addComponent(rbtKhac))
-                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(23, 23, 23)
+                        .addComponent(cbxAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(26, 26, 26))
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -250,14 +253,14 @@ public class StaffCRUD extends javax.swing.JPanel {
                         .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 245, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(cbxSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(83, Short.MAX_VALUE))
+                .addContainerGap(75, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(18, 18, 18)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 42, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cbxSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)

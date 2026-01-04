@@ -15,14 +15,14 @@ import javax.swing.SwingUtilities;
  *
  * @author vanminh
  */
-public class MainForm extends javax.swing.JFrame {
+public class CustomersForm extends javax.swing.JFrame {
     
     private Users currentUser;
     private HomePage homePage;
     private StaffCRUD customerCRUD;
     private SuppliersCRUD suppliersCRUD;
     private Account account;
-    public MainForm(Users user) {
+    public CustomersForm(Users user) {
         this.currentUser = user;
         initComponents();
         checkPermissions();
@@ -44,18 +44,6 @@ public class MainForm extends javax.swing.JFrame {
         }
         showPanel(homePage, btnTrangchu);
     }
-    public void setcustomerCRUD(){
-        if(customerCRUD == null){
-            customerCRUD = new StaffCRUD(this);
-        }
-        showPanel(customerCRUD, btnStaff);
-    }
-    public void setsuppliersCRUD(){
-        if(suppliersCRUD == null){
-            suppliersCRUD = new SuppliersCRUD(this);
-        }
-        showPanel(suppliersCRUD, btnSuppliers);
-    }
     public void setupAccount(){
         if(account == null){
             account = new Account(this);
@@ -67,32 +55,17 @@ public class MainForm extends javax.swing.JFrame {
         String role = currentUser.getRole().trim();
         String Name = currentUser.getFullName().trim();
         
-        System.out.println("DEBUG - Role hien tai: [" + role + "]");
-        
-        if (role.equalsIgnoreCase("staff")) {
+        System.out.println("DEBUG - Role hien tai: [" + role + "]");       
             txtName.setText(Name);
-            txtRole.setText(role);
-            btnStaff.setVisible(false);
-            btnSuppliers.setVisible(false);
-            btnBrands.setVisible(false);
-        } else if (role.equalsIgnoreCase("admin")) {
-            txtName.setText(Name);
-            txtRole.setText(role);
-            btnStaff.setEnabled(true);
-            btnSuppliers.setEnabled(true);
-            btnBrands.setEnabled(true);
-        }
+            txtRole.setText(role);           
     }
     public void resetbtn(){
         btnTrangchu.setBackground(new Color(255,255,255));
-        btnCategory.setBackground(new Color(255,255,255));
+        btnCart.setBackground(new Color(255,255,255));
         btnProduct.setBackground(new Color(255,255,255));
-        btnBrands.setBackground(new Color(255,255,255));
-        btnStaff.setBackground(new Color(255,255,255));
         btnOrder.setBackground(new Color(255,255,255));
         btnNotification.setBackground(new Color(255,255,255));
         btnSatistical.setBackground(new Color(255,255,255));
-        btnSuppliers.setBackground(new Color(255,255,255));
         btnTk.setBackground(new Color(255,255,255));
     }
 
@@ -108,18 +81,12 @@ public class MainForm extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         btnTrangchu = new javax.swing.JButton();
         btnProduct = new javax.swing.JButton();
-        btnCategory = new javax.swing.JButton();
-        btnOrder = new javax.swing.JButton();
-        btnStaff = new javax.swing.JButton();
-        btnNotification = new javax.swing.JButton();
-        btnSatistical = new javax.swing.JButton();
+        btnCart = new javax.swing.JButton();
         btnLogout = new javax.swing.JButton();
         txtName = new javax.swing.JTextField();
         txtRole = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         btnTk = new javax.swing.JButton();
-        btnSuppliers = new javax.swing.JButton();
-        btnBrands = new javax.swing.JButton();
         jplfill2 = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -141,25 +108,8 @@ public class MainForm extends javax.swing.JFrame {
         btnProduct.setText("Sản Phẩm");
         btnProduct.setBorderPainted(false);
 
-        btnCategory.setText("Danh mục");
-        btnCategory.setBorderPainted(false);
-
-        btnOrder.setText("Hóa đơn");
-        btnOrder.setBorderPainted(false);
-
-        btnStaff.setText("Nhân viên");
-        btnStaff.setBorderPainted(false);
-        btnStaff.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnStaffActionPerformed(evt);
-            }
-        });
-
-        btnNotification.setText("Thông báo");
-        btnNotification.setBorderPainted(false);
-
-        btnSatistical.setText("Thống kê");
-        btnSatistical.setBorderPainted(false);
+        btnCart.setText("Giỏ hàng");
+        btnCart.setBorderPainted(false);
 
         btnLogout.setText("Đăng xuất");
         btnLogout.setBorderPainted(false);
@@ -191,40 +141,23 @@ public class MainForm extends javax.swing.JFrame {
             }
         });
 
-        btnSuppliers.setText("Nhà cung cấp");
-        btnSuppliers.setBorderPainted(false);
-        btnSuppliers.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSuppliersActionPerformed(evt);
-            }
-        });
-
-        btnBrands.setText("Thương hiệu");
-        btnBrands.setBorderPainted(false);
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(btnTrangchu, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(btnProduct, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(btnCategory, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(btnOrder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(btnStaff, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnCart, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(btnLogout, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(btnTk, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(btnNotification, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(btnSatistical, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 51, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE)
                     .addComponent(txtRole))
                 .addContainerGap())
-            .addComponent(btnBrands, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(btnSuppliers, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -241,20 +174,8 @@ public class MainForm extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnNotification, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnSatistical, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnStaff, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnSuppliers, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnBrands, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 36, Short.MAX_VALUE)
+                .addComponent(btnCart, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnTk, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnLogout, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -277,21 +198,16 @@ public class MainForm extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 560, Short.MAX_VALUE)
-            .addComponent(jplfill2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+            .addComponent(jplfill2, javax.swing.GroupLayout.DEFAULT_SIZE, 560, Short.MAX_VALUE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnTrangchuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTrangchuActionPerformed
+    private void btnTkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTkActionPerformed
         // TODO add your handling code here:
-        setHomePage();
-    }//GEN-LAST:event_btnTrangchuActionPerformed
-
-    private void btnStaffActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStaffActionPerformed
-        // TODO add your handling code here:
-        setcustomerCRUD();
-    }//GEN-LAST:event_btnStaffActionPerformed
+        setupAccount();
+    }//GEN-LAST:event_btnTkActionPerformed
 
     private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
         // TODO add your handling code here:
@@ -299,15 +215,10 @@ public class MainForm extends javax.swing.JFrame {
         new LoginForm().setVisible(true);
     }//GEN-LAST:event_btnLogoutActionPerformed
 
-    private void btnSuppliersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSuppliersActionPerformed
+    private void btnTrangchuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTrangchuActionPerformed
         // TODO add your handling code here:
-        setsuppliersCRUD();
-    }//GEN-LAST:event_btnSuppliersActionPerformed
-
-    private void btnTkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTkActionPerformed
-        // TODO add your handling code here:
-        setupAccount();
-    }//GEN-LAST:event_btnTkActionPerformed
+        setHomePage();
+    }//GEN-LAST:event_btnTrangchuActionPerformed
 
     /**
      * @param args the command line arguments
@@ -320,15 +231,9 @@ public class MainForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnBrands;
-    private javax.swing.JButton btnCategory;
+    private javax.swing.JButton btnCart;
     private javax.swing.JButton btnLogout;
-    private javax.swing.JButton btnNotification;
-    private javax.swing.JButton btnOrder;
     private javax.swing.JButton btnProduct;
-    private javax.swing.JButton btnSatistical;
-    private javax.swing.JButton btnStaff;
-    private javax.swing.JButton btnSuppliers;
     private javax.swing.JButton btnTk;
     private javax.swing.JButton btnTrangchu;
     private javax.swing.JLabel jLabel1;

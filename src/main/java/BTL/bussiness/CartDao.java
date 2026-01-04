@@ -18,6 +18,10 @@ import java.util.Optional;
  */
 
 
+/**
+ *
+ * @author vanminh
+ */
 public class CartDao implements Dao<Cart> {
 
     private final String TABLE_NAME = "cart";
@@ -28,9 +32,9 @@ public class CartDao implements Dao<Cart> {
         List<Cart> list = new ArrayList<>();
         Connection conn = myConnection.getConnection();
         PreparedStatement ps = null;
+        ResultSet rs = null;
         String sql = "select c.*, p.name, p.price from " + TABLE_NAME + " c "
                    + "join products p on c.product_id = p.product_id";
-        ResultSet rs = null;
         try {
             ps = conn.prepareStatement(sql);
             rs = ps.executeQuery();
@@ -50,14 +54,14 @@ public class CartDao implements Dao<Cart> {
         return list;
     }
 
-    // Lấy giỏ hàng theo User ID (Dùng để hiển thị giỏ hàng của khách đang đăng nhập)
+    // Lấy giỏ hàng theo User ID
     public List<Cart> getByUser(int userId) {
         List<Cart> list = new ArrayList<>();
         Connection conn = myConnection.getConnection();
         PreparedStatement ps = null;
+        ResultSet rs = null;
         String sql = "select c.*, p.name, p.price from " + TABLE_NAME + " c "
                    + "join products p on c.product_id = p.product_id where c.user_id = ?";
-        ResultSet rs = null;
         try {
             ps = conn.prepareStatement(sql);
             ps.setInt(1, userId);
@@ -83,8 +87,8 @@ public class CartDao implements Dao<Cart> {
         Cart c = null;
         Connection conn = myConnection.getConnection();
         PreparedStatement ps = null;
-        String sql = "select * from " + TABLE_NAME + " where cart_id = ?";
         ResultSet rs = null;
+        String sql = "select * from " + TABLE_NAME + " where cart_id = ?";
         try {
             ps = conn.prepareStatement(sql);
             ps.setInt(1, id);
@@ -106,10 +110,9 @@ public class CartDao implements Dao<Cart> {
     public int insert(Cart t) {
         Connection conn = myConnection.getConnection();
         PreparedStatement ps = null;
-        // Nếu trùng sản phẩm thì cộng dồn số lượng (giữ đúng yêu cầu thêm nhiều món)
+        ResultSet rs = null;
         String sql = "insert into " + TABLE_NAME + "(user_id, product_id, quantity) values(?, ?, ?) "
                    + "on duplicate key update quantity = quantity + ?";
-        ResultSet rs = null;
         try {
             ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, t.getUserId());
@@ -126,7 +129,6 @@ public class CartDao implements Dao<Cart> {
         return -1;
     }
 
-    // Hàm thêm nhiều sản phẩm một lúc (Batch Processing)
     public boolean addMultiple(List<Cart> list) {
         Connection conn = myConnection.getConnection();
         PreparedStatement ps = null;
@@ -147,19 +149,18 @@ public class CartDao implements Dao<Cart> {
             conn.setAutoCommit(true);
             return true;
         } catch (Exception e) {
-            try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            try { conn.rollback(); conn.setAutoCommit(true); } catch (SQLException ex) {}
             e.printStackTrace();
         }
         return false;
     }
 
-    // Hàm Thanh toán: Cart -> Orders -> OrderDetails -> Xóa Cart
     public boolean checkout(int userId, String address, String method) {
         Connection conn = myConnection.getConnection();
         try {
-            conn.setAutoCommit(false); // Bắt đầu Transaction
-
-            // 1. Tính tổng tiền
+            conn.setAutoCommit(false);
+            
+            // 1. Tính tổng
             double total = 0;
             String sqlTotal = "select sum(c.quantity * p.price) from cart c join products p on c.product_id = p.product_id where c.user_id = ?";
             PreparedStatement ps1 = conn.prepareStatement(sqlTotal);
@@ -168,7 +169,7 @@ public class CartDao implements Dao<Cart> {
             if (rs1.next()) total = rs1.getDouble(1);
             if (total <= 0) return false;
 
-            // 2. Tạo đơn hàng (Orders)
+            // 2. Tạo Order
             int orderId = -1;
             String sqlOrder = "insert into orders(user_id, total_amount, shipping_address, payment_method) values(?, ?, ?, ?)";
             PreparedStatement ps2 = conn.prepareStatement(sqlOrder, Statement.RETURN_GENERATED_KEYS);
@@ -180,7 +181,7 @@ public class CartDao implements Dao<Cart> {
             ResultSet rs2 = ps2.getGeneratedKeys();
             if (rs2.next()) orderId = rs2.getInt(1);
 
-            // 3. Chuyển sang Order Details
+            // 3. Move sang Details
             String sqlDetail = "insert into order_details(order_id, product_id, quantity, price_at_purchase) "
                              + "select ?, c.product_id, c.quantity, p.price from cart c "
                              + "join products p on c.product_id = p.product_id where c.user_id = ?";
@@ -189,7 +190,7 @@ public class CartDao implements Dao<Cart> {
             ps3.setInt(2, userId);
             ps3.executeUpdate();
 
-            // 4. Xóa giỏ hàng
+            // 4. Xóa Cart
             String sqlDelete = "delete from cart where user_id = ?";
             PreparedStatement ps4 = conn.prepareStatement(sqlDelete);
             ps4.setInt(1, userId);
@@ -199,7 +200,7 @@ public class CartDao implements Dao<Cart> {
             conn.setAutoCommit(true);
             return true;
         } catch (Exception e) {
-            try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            try { conn.rollback(); conn.setAutoCommit(true); } catch (SQLException ex) {}
             e.printStackTrace();
         }
         return false;

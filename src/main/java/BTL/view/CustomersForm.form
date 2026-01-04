@@ -36,7 +36,7 @@
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
           <Component id="jPanel1" pref="560" max="32767" attributes="0"/>
-          <Component id="jplfill2" alignment="0" pref="0" max="32767" attributes="0"/>
+          <Component id="jplfill2" alignment="0" pref="560" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
   </Layout>
@@ -64,16 +64,12 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Component id="btnTrangchu" max="32767" attributes="0"/>
               <Component id="btnProduct" alignment="0" max="32767" attributes="0"/>
-              <Component id="btnCategory" alignment="1" max="32767" attributes="0"/>
-              <Component id="btnOrder" alignment="0" max="32767" attributes="0"/>
-              <Component id="btnStaff" alignment="0" max="32767" attributes="0"/>
+              <Component id="btnCart" alignment="1" max="32767" attributes="0"/>
               <Component id="btnLogout" alignment="0" max="32767" attributes="0"/>
               <Component id="btnTk" alignment="0" max="32767" attributes="0"/>
-              <Component id="btnNotification" alignment="0" max="32767" attributes="0"/>
-              <Component id="btnSatistical" alignment="0" max="32767" attributes="0"/>
               <Group type="102" alignment="1" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jLabel1" pref="0" max="32767" attributes="0"/>
+                  <Component id="jLabel1" pref="51" max="32767" attributes="0"/>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
                       <Component id="txtName" pref="123" max="32767" attributes="0"/>
@@ -81,8 +77,6 @@
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
-              <Component id="btnBrands" alignment="0" max="32767" attributes="0"/>
-              <Component id="btnSuppliers" alignment="0" pref="198" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
@@ -102,20 +96,8 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="btnProduct" min="-2" pref="36" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="btnCategory" min="-2" pref="36" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="btnOrder" min="-2" pref="36" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="btnNotification" min="-2" pref="36" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="btnSatistical" min="-2" pref="36" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="btnStaff" min="-2" pref="36" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="btnSuppliers" min="-2" pref="37" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="btnBrands" min="-2" pref="37" max="-2" attributes="0"/>
-                  <EmptySpace pref="36" max="32767" attributes="0"/>
+                  <Component id="btnCart" min="-2" pref="36" max="-2" attributes="0"/>
+                  <EmptySpace max="32767" attributes="0"/>
                   <Component id="btnTk" min="-2" pref="37" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="btnLogout" min="-2" pref="37" max="-2" attributes="0"/>
@@ -139,36 +121,9 @@
             <Property name="borderPainted" type="boolean" value="false"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="btnCategory">
+        <Component class="javax.swing.JButton" name="btnCart">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Danh m&#x1ee5;c"/>
-            <Property name="borderPainted" type="boolean" value="false"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JButton" name="btnOrder">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="H&#xf3;a &#x111;&#x1a1;n"/>
-            <Property name="borderPainted" type="boolean" value="false"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JButton" name="btnStaff">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Nh&#xe2;n vi&#xea;n"/>
-            <Property name="borderPainted" type="boolean" value="false"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnStaffActionPerformed"/>
-          </Events>
-        </Component>
-        <Component class="javax.swing.JButton" name="btnNotification">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Th&#xf4;ng b&#xe1;o"/>
-            <Property name="borderPainted" type="boolean" value="false"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JButton" name="btnSatistical">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Th&#x1ed1;ng k&#xea;"/>
+            <Property name="text" type="java.lang.String" value="Gi&#x1ecf; h&#xe0;ng"/>
             <Property name="borderPainted" type="boolean" value="false"/>
           </Properties>
         </Component>
@@ -230,21 +185,6 @@
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnTkActionPerformed"/>
           </Events>
-        </Component>
-        <Component class="javax.swing.JButton" name="btnSuppliers">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Nh&#xe0; cung c&#x1ea5;p"/>
-            <Property name="borderPainted" type="boolean" value="false"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSuppliersActionPerformed"/>
-          </Events>
-        </Component>
-        <Component class="javax.swing.JButton" name="btnBrands">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Th&#x1b0;&#x1a1;ng hi&#x1ec7;u"/>
-            <Property name="borderPainted" type="boolean" value="false"/>
-          </Properties>
         </Component>
       </SubComponents>
     </Container>

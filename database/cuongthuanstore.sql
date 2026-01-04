@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th1 03, 2026 lúc 09:57 AM
+-- Thời gian đã tạo: Th1 04, 2026 lúc 02:09 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -127,6 +127,7 @@ INSERT INTO `notifications` (`notification_id`, `user_id`, `title`, `message`, `
 CREATE TABLE `orders` (
   `order_id` int(11) NOT NULL,
   `user_id` int(11) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
   `total_amount` decimal(15,2) NOT NULL,
   `status` enum('pending','confirmed','shipping','delivered','cancelled') DEFAULT 'pending',
   `shipping_address` text NOT NULL,
@@ -138,12 +139,13 @@ CREATE TABLE `orders` (
 -- Đang đổ dữ liệu cho bảng `orders`
 --
 
-INSERT INTO `orders` (`order_id`, `user_id`, `total_amount`, `status`, `shipping_address`, `payment_method`, `created_at`) VALUES
-(1, 3, 28000000.00, 'delivered', '789 CMT8, Hà Nội', 'Banking', '2026-01-02 11:13:39'),
-(2, 4, 22500000.00, 'shipping', '321 Lý Tự Trọng, Đà Nẵng', 'COD', '2026-01-02 11:13:39'),
-(3, 5, 37500000.00, 'pending', '654 Trần Hưng Đạo, Cần Thơ', 'COD', '2026-01-02 11:13:39'),
-(4, 3, 17000000.00, 'confirmed', '789 CMT8, Hà Nội', 'Banking', '2026-01-02 11:13:39'),
-(5, 4, 2500000.00, 'cancelled', '321 Lý Tự Trọng, Đà Nẵng', 'COD', '2026-01-02 11:13:39');
+INSERT INTO `orders` (`order_id`, `user_id`, `name`, `total_amount`, `status`, `shipping_address`, `payment_method`, `created_at`) VALUES
+(1, 3, 'Lê Văn Khách', 28000000.00, 'delivered', '789 CMT8, Hà Nội', 'Banking', '2026-01-02 11:13:39'),
+(2, 4, 'Phạm Minh Anh', 22500000.00, 'shipping', '321 Lý Tự Trọng, Đà Nẵng', 'COD', '2026-01-02 11:13:39'),
+(3, 5, 'Hoàng Thị Lan', 37500000.00, 'pending', '654 Trần Hưng Đạo, Cần Thơ', 'COD', '2026-01-02 11:13:39'),
+(4, 3, 'Lê Văn Khách', 17000000.00, 'confirmed', '789 CMT8, Hà Nội', 'Banking', '2026-01-02 11:13:39'),
+(5, 4, 'Phạm Minh Anh', 2500000.00, 'cancelled', '321 Lý Tự Trọng, Đà Nẵng', 'COD', '2026-01-02 11:13:39'),
+(6, NULL, 'Nguyễn Văn Khách', 1500000.00, 'pending', '123 Đường ABC, Quận 1, HCM', 'COD', '2026-01-03 12:15:30');
 
 -- --------------------------------------------------------
 
@@ -218,11 +220,11 @@ CREATE TABLE `suppliers` (
 --
 
 INSERT INTO `suppliers` (`supplier_id`, `name`, `phone_number`, `email`, `address`) VALUES
-(1, 'Công ty Digiworld', '19001234', 'contact@digiworld.com.vn', 'Số 1 Trần Hưng Đạo, Q1, TP.HCM'),
-(2, 'FPT Wholesale', '18005566', 'wholesale@fpt.com.vn', 'Tòa nhà FPT, Cầu Giấy, Hà Nội'),
-(3, 'Thế Giới Số', '028334455', 'info@thegioiso.com', 'Lô IV-11, KCN Tân Bình, TP.HCM'),
-(4, 'Công ty Viễn Sơn', '028383344', 'support@vienson.vn', '175 Nguyễn Thị Minh Khai, Q1, TP.HCM'),
-(5, 'Dầu Khí (PST)', '024377221', 'sales@pst.com.vn', 'Lê Duẩn, Hà Nội');
+(1, 'FPT Wholesale', '18005566', 'wholesale@fpt.com.vn', 'TP.HCM'),
+(2, 'FPT Wholesale', '18005566', 'wholesale@fpt.com.vn', 'Đà Nẵng'),
+(3, 'Thế Giới Số', '028334455', 'info@thegioiso.com', 'Hải Phòng'),
+(4, 'Công ty Viễn Sơn', '028383344', 'support@vienson.vn', 'Thanh Hóa'),
+(5, 'Dầu Khí (PST)', '024377221', 'sales@pst.com.vn', 'Hà Nội');
 
 -- --------------------------------------------------------
 
@@ -247,7 +249,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `full_name`, `email`, `password_hash`, `phone_number`, `address`, `gender`, `role`, `created_at`) VALUES
-(1, 'Nguyễn Văn Minh', 'admin', 'admin123', '0901234567', '123 Lê Lợi, TP.HCM', 'Nam', 'admin', '2026-01-02 11:13:39'),
+(1, 'Nguyễn Văn Minh', 'admin', 'hehe123', '0985772330', 'Hà Nội', 'Nam', 'admin', '2026-01-02 11:13:39'),
 (2, 'Trần Thị Nhân Viên', 'staff', 'staff123', '0907654321', '456 Nguyễn Huệ, TP.HCM', 'Nữ', 'customer', '2026-01-02 11:13:39'),
 (3, 'Lê Văn Khách', 'khach1@gmail.com', 'hash789', '0912345678', '789 CMT8, Hà Nội', 'Nam', 'customer', '2026-01-02 11:13:39'),
 (4, 'Phạm Minh Anh', 'minhanh@gmail.com', 'hashabc', '0922334455', '321 Lý Tự Trọng, Đà Nẵng', 'Khác', 'customer', '2026-01-02 11:13:39'),
@@ -356,7 +358,7 @@ ALTER TABLE `notifications`
 -- AUTO_INCREMENT cho bảng `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT cho bảng `order_details`

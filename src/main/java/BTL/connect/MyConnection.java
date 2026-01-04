@@ -25,10 +25,15 @@ public class MyConnection {
         return instance;
     }
     public Connection getConnection(){
-        if (conn == null) {
+        try {
+        // Kiểm tra nếu conn chưa khởi tạo HOẶC đã bị đóng thì mới mở kết nối mới
+        if (conn == null || conn.isClosed()) {
             return open();
         }
-        return conn;
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return conn;
     }
     private Connection open(){
         try {

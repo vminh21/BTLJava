@@ -6,10 +6,13 @@ package BTL.view;
 
 import BTL.bussiness.SuppliersDao;
 import BTL.entity.Suppliers;
+import BTL.verify.NumberVerify;
+import BTL.verify.StringVerify;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import javax.swing.RowFilter;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 
@@ -29,17 +32,19 @@ public class SuppliersCRUD extends javax.swing.JPanel {
         initCustom();
     }
     private void initCustom() {
-        // 1. Thiết lập Table
+        txtName.setInputVerifier(new StringVerify());
+        txtPhone.setInputVerifier(new NumberVerify());
         tableModel = (DefaultTableModel) tblSuppliers.getModel();
         tableModel.setColumnIdentifiers(new Object[]{"ID", "Tên NCC", "Số ĐT", "Email", "Địa chỉ"});
         
-        // 2. Thiết lập bộ lọc tìm kiếm
+        //  Thiết lập bộ lọc tìm kiếm
         rowSorter = new TableRowSorter<>(tableModel);
         tblSuppliers.setRowSorter(rowSorter);
         
-        // 3. Thiết lập ComboBox Địa chỉ
         cbxAddress.setModel(new DefaultComboBoxModel<>(new String[] { 
-            "Hà Nội", "TP.HCM", "Đà Nẵng", "Cần Thơ", "Hải Phòng", "Thanh Hóa" 
+            "Hà Nội", "Nam Định", "Thái Bình", "Ninh Bình", "Hải Phòng", 
+            "Đà Nẵng", "TP. Hồ Chí Minh", "Cần Thơ", "Thanh Hóa", "Nghệ An", 
+            "Quảng Ninh", "Lào Cai", "Huế", "Khánh Hòa", "Lâm Đồng" 
         }));
         cbxSearch.setModel(new DefaultComboBoxModel<>(new String[] { 
             "Tất cả", "Tên", "Email", "Số điện thoại" 
@@ -58,7 +63,7 @@ public class SuppliersCRUD extends javax.swing.JPanel {
         }
     }
     private void setupSearchEvent() {
-        txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+        txtSearch.getDocument().addDocumentListener(new DocumentListener() {
             public void insertUpdate(javax.swing.event.DocumentEvent e) { search(); }
             public void removeUpdate(javax.swing.event.DocumentEvent e) { search(); }
             public void changedUpdate(javax.swing.event.DocumentEvent e) { search(); }
@@ -295,9 +300,23 @@ public class SuppliersCRUD extends javax.swing.JPanel {
         // TODO add your handling code here:
         int row = tblSuppliers.getSelectedRow();
         if (row != -1) {
-            int id = (int) tblSuppliers.getValueAt(row, 0);
+            Integer id = (int) tblSuppliers.getValueAt(row, 0);
             if (JOptionPane.showConfirmDialog(this, "Xóa nhà cung cấp ID: " + id + "?", "Xác nhận", JOptionPane.YES_NO_OPTION) == 0) {
-                suppliersDao.delete(id);
+                try {
+                        boolean success = suppliersDao.delete(id);
+                        if (success) {
+                            JOptionPane.showMessageDialog(this, "Xóa thành công!");
+                        }
+                    } catch (Exception e) {
+                        if (e.getMessage().contains("foreign key constraint fails")) {
+                            JOptionPane.showMessageDialog(this, 
+                                "Không thể xóa nhà cung cấp này vì vẫn còn sản phẩm thuộc về họ!", 
+                                "Lỗi ràng buộc dữ liệu", 
+                                JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(this, "Lỗi: " + e.getMessage());
+                        }
+                    }
                 loadData();
                 btnResetActionPerformed(null);
             }

@@ -22,11 +22,14 @@ public class CustomersForm extends javax.swing.JFrame {
     private StaffCRUD customerCRUD;
     private SuppliersCRUD suppliersCRUD;
     private Account account;
+    private ShopForm shopForm;
+    private TrangchuCRUD trangchuCRUD;
+    private CartForm cartForm;
     public CustomersForm(Users user) {
         this.currentUser = user;
         initComponents();
         checkPermissions();
-        setHomePage();
+        setTrangChu();
         this.setResizable(false);
         this.setLocationRelativeTo(null);
     }
@@ -38,18 +41,35 @@ public class CustomersForm extends javax.swing.JFrame {
         jplfill2.revalidate();
         jplfill2.repaint();
     }
-    public void setHomePage(){
-        if(homePage == null){
-            homePage = new HomePage(this);
-        }
-        showPanel(homePage, btnTrangchu);
-    }
     public void setupAccount(){
         if(account == null){
             account = new Account(this);
         }
         account.setProfileData(this.currentUser);
         showPanel(account, btnTk);
+    }
+    public void setProductForm(){
+        if(shopForm == null){
+            shopForm = new ShopForm(this);
+        }
+        showPanel(shopForm, btnProduct);
+    }
+    public void setTrangChu(){
+        if(trangchuCRUD == null){
+            trangchuCRUD = new TrangchuCRUD(this);
+        }
+        showPanel(trangchuCRUD, btnTrangchu);
+    }
+    public void setCartForm(){
+        if (cartForm == null) {
+        // TRƯỚC: cartForm = new CartForm(this); (Thiếu tham số)
+        // SAU: Truyền cả form cha và user hiện tại vào
+        cartForm = new CartForm(this, this.currentUser); 
+    } else {
+        // Mỗi lần mở lại Giỏ hàng, nên load lại data mới nhất từ DB
+        cartForm.loadCartData(this.currentUser.getUserId());
+    }
+    showPanel(cartForm, btnCart);
     }
     private void checkPermissions() {
         String role = currentUser.getRole().trim();
@@ -63,10 +83,14 @@ public class CustomersForm extends javax.swing.JFrame {
         btnTrangchu.setBackground(new Color(255,255,255));
         btnCart.setBackground(new Color(255,255,255));
         btnProduct.setBackground(new Color(255,255,255));
-        btnOrder.setBackground(new Color(255,255,255));
-        btnNotification.setBackground(new Color(255,255,255));
-        btnSatistical.setBackground(new Color(255,255,255));
         btnTk.setBackground(new Color(255,255,255));
+    }
+    public void showProductByCategory(int catId, String catName) {
+        // Tạo ShopForm mới và truyền tên danh mục vào để nó tự lọc
+        ShopForm shopByCat = new ShopForm(catName);
+
+        // Hiển thị ShopForm lên vùng nội dung jplfill2
+        showPanel(shopByCat, btnProduct);
     }
 
     /**
@@ -107,9 +131,19 @@ public class CustomersForm extends javax.swing.JFrame {
 
         btnProduct.setText("Sản Phẩm");
         btnProduct.setBorderPainted(false);
+        btnProduct.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnProductActionPerformed(evt);
+            }
+        });
 
         btnCart.setText("Giỏ hàng");
         btnCart.setBorderPainted(false);
+        btnCart.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCartActionPerformed(evt);
+            }
+        });
 
         btnLogout.setText("Đăng xuất");
         btnLogout.setBorderPainted(false);
@@ -217,8 +251,18 @@ public class CustomersForm extends javax.swing.JFrame {
 
     private void btnTrangchuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTrangchuActionPerformed
         // TODO add your handling code here:
-        setHomePage();
+        setTrangChu();
     }//GEN-LAST:event_btnTrangchuActionPerformed
+
+    private void btnProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProductActionPerformed
+        // TODO add your handling code here:
+        setProductForm();
+    }//GEN-LAST:event_btnProductActionPerformed
+
+    private void btnCartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCartActionPerformed
+        // TODO add your handling code here:
+        setCartForm();
+    }//GEN-LAST:event_btnCartActionPerformed
 
     /**
      * @param args the command line arguments

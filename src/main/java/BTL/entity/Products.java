@@ -9,6 +9,7 @@ package BTL.entity;
  * @author vanminh
  */
 public class Products {
+
     private int productId;
     private String name;
     private int categoryId;
@@ -18,8 +19,9 @@ public class Products {
     private int stockQuantity;
     private String description;
     private String thumbnail;
-    
-    public Products() {}
+
+    public Products() {
+    }
 
     public Products(int productId, String name, int categoryId, int brandId, int supplierId, double price, int stockQuantity, String description, String thumbnail) {
         this.productId = productId;
@@ -109,5 +111,5 @@ public class Products {
     public String toString() {
         return "Products{" + "productId=" + productId + ", name=" + name + ", categoryId=" + categoryId + ", brandId=" + brandId + ", supplierId=" + supplierId + ", price=" + price + ", stockQuantity=" + stockQuantity + ", description=" + description + ", thumbnail=" + thumbnail + '}';
     }
-    
+
 }

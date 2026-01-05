@@ -21,13 +21,11 @@ public class Register extends javax.swing.JPanel {
         this.loginForm = loginForm;
     }
     private void initAddressData() {
-    // 1. Danh sách dữ liệu mẫu
     String[] provinces = {
-        "Hà Nội", "Nam Định", "Thái Bình", "Ninh Bình", 
-        "Hải Phòng", "Đà Nẵng", "TP. Hồ Chí Minh", "Cần Thơ"
+        "Hà Nội", "Nam Định", "Thái Bình", "Ninh Bình", "Hải Phòng", 
+        "Đà Nẵng", "TP. Hồ Chí Minh", "Cần Thơ", "Thanh Hóa", "Nghệ An", 
+        "Quảng Ninh", "Lào Cai", "Huế", "Khánh Hòa", "Lâm Đồng"
     };
-
-    // 2. Xóa dữ liệu cũ (nếu có) và nạp dữ liệu mới
     cbxAddress.removeAllItems();
     for (String province : provinces) {
         cbxAddress.addItem(province);
@@ -238,15 +236,13 @@ public class Register extends javax.swing.JPanel {
 
     private void btnRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegisterActionPerformed
         // TODO add your handling code here:
-        // 1. Lấy dữ liệu từ các ô nhập liệu
     String name = txtName.getText().trim();
     String email = txtEmail.getText().trim();
     String phone = txtPhone.getText().trim();
-    String address = cbxAddress.getSelectedItem().toString(); // Lấy từ ComboBox
+    String address = cbxAddress.getSelectedItem().toString();
     String password = new String(txtPassword.getPassword());
     String confirmPass = new String(txtConfirmPassword.getPassword());
 
-    // Xử lý giới tính từ Radio Button
     String gender = "Khác";
     if (rbtNam.isSelected()) {
         gender = "Nam";
@@ -254,33 +250,28 @@ public class Register extends javax.swing.JPanel {
         gender = "Nữ";
     }
 
-    // 2. Kiểm tra dữ liệu (Validation)
     if (name.isEmpty() || email.isEmpty() || password.isEmpty() || phone.isEmpty()) {
         JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ các thông tin bắt buộc!");
         return;
     }
-    // 2. Kiểm tra định dạng (Regex)
-    if (!isValidEmail(email)) {
+    else if (!isValidEmail(email)) {
         JOptionPane.showMessageDialog(this, "Email không đúng định dạng (ví dụ: abc@gmail.com)!");
         txtEmail.requestFocus();
         return;
     }
-    // 3. Kiểm tra email đã tồn tại trong Database chưa
-    if (usersDao.get(email).isPresent()) {
+    else if (usersDao.get(email).isPresent()) {
         JOptionPane.showMessageDialog(this, "Email này đã được sử dụng, vui lòng chọn email khác!");
         txtEmail.requestFocus();
         return;
     }
-
-    if (!password.equals(confirmPass)) {
+    else if (!password.equals(confirmPass)) {
         JOptionPane.showMessageDialog(this, "Mật khẩu xác nhận không khớp!");
         return;
     }
-    // 4. Tạo đối tượng Users
+
     Users newUser = new Users(0,name, email, password, phone, address, gender);
     int result = usersDao.insert(newUser);
 
-    // 5. Thông báo kết quả
     if (result > 0) {
         JOptionPane.showMessageDialog(this, "Đăng ký thành công!");
         loginForm.setLogin();

@@ -84,7 +84,7 @@ public class SuppliersDao implements Dao<Suppliers> {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
-        } catch (Exception e) { e.printStackTrace(); }
-        return false;
+        } catch (Exception e) { // Ném lỗi vào RuntimeException để View (Giao diện) có thể bắt được
+        throw new RuntimeException(e); }
     }
 }

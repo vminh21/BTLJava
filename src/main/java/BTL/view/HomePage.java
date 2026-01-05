@@ -4,22 +4,123 @@
  */
 package BTL.view;
 
+import BTL.connect.MyConnection;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+import javax.swing.SwingConstants;
+
 /**
  *
- * @author vanminh
+ * @author macbook
  */
 public class HomePage extends javax.swing.JPanel {
 
+    // --- 1. KHAI BÁO BIẾN LƯU MAINFORM (QUAN TRỌNG) ---
+    // 1. Thêm dòng này để khai báo biến
     private MainForm mainForm;
     private CustomersForm customersForm;
-    
-    public HomePage(CustomersForm customersForm) {
+
+    // 2. Thêm hàm khởi tạo này để nhận MainForm (QUAN TRỌNG)
+    public HomePage(MainForm main) {
+        this.mainForm = main;
         initComponents();
-        this.customersForm = customersForm;
+        loadCategoryButtons();
     }
-    public HomePage(MainForm mainForm) {
+
+    public HomePage(CustomersForm customers) {
+        this.customersForm = customers;
         initComponents();
-        this.mainForm = mainForm;
+        loadCategoryButtons();
+    }
+
+    // 3. Giữ nguyên hàm cũ này (để không bị lỗi ở chỗ khác)
+    public HomePage() {
+        initComponents();
+        loadCategoryButtons();
+    }
+
+    private void loadCategoryButtons() {
+        try {
+            // 1. Dọn sạch giao diện cũ (để tránh bị nhân đôi nút khi reload)
+            jPanel1.removeAll();
+
+            // Thiết lập lại Layout: Lưới 2 cột, khoảng cách các nút là 20px
+            jPanel1.setLayout(new GridLayout(0, 2, 20, 20));
+
+            // 2. Lấy kết nối từ class MyConnection của bạn
+            Connection conn = MyConnection.getInstance().getConnection();
+
+            if (conn == null) {
+                JOptionPane.showMessageDialog(this, "Lỗi: Không thể kết nối đến Database!");
+                return;
+            }
+
+            // 3. Viết câu lệnh SQL lấy danh mục
+            String sql = "SELECT * FROM categories";
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            // 4. Duyệt qua từng dòng dữ liệu lấy được
+            while (rs.next()) {
+                int catId = rs.getInt("category_id");
+                String catName = rs.getString("name");
+                String desc = rs.getString("description"); // Lấy mô tả để làm tooltip
+
+                // --- Tạo nút bấm ---
+                JButton btn = new JButton(catName);
+
+                // Trang trí nút cho đẹp
+                btn.setFont(new Font("Segoe UI", Font.BOLD, 16));
+                btn.setBackground(new Color(255, 255, 255)); // Màu nền trắng
+                btn.setForeground(new Color(51, 51, 51));    // Màu chữ xám đen
+                btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); // Rê chuột vào hiện bàn tay
+                btn.setToolTipText(desc); // Rê chuột vào hiện mô tả danh mục
+
+                // Gắn icon (nếu bạn muốn, hiện tại để text trước)
+                // btn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/laptop.png")));
+                // --- Gắn sự kiện khi bấm nút ---
+                btn.addActionListener(e -> {
+                    onCategoryClick(catId, catName);
+                });
+
+                // Thêm nút vào jPanel1
+                jPanel1.add(btn);
+            }
+
+            // 5. Đóng các luồng dữ liệu (Không đóng conn để dùng lại chỗ khác)
+            rs.close();
+            st.close();
+
+            // 6. Lệnh quan trọng: Vẽ lại giao diện
+            jPanel1.revalidate();
+            jPanel1.repaint();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi tải danh mục: " + e.getMessage());
+        }
+    }
+
+    // ========================================================
+    // HÀM 2: XỬ LÝ KHI BẤM VÀO NÚT DANH MỤC
+    // ========================================================
+    private void onCategoryClick(int categoryId, String categoryName) {
+        if (customersForm != null) {
+            // Nếu đang ở giao diện khách hàng -> Nhảy sang Shop của khách
+            customersForm.showProductByCategory(categoryId, categoryName);
+        } else if (mainForm != null) {
+            // Nếu đang ở giao diện Admin -> Nhảy sang Product của Admin
+            mainForm.showProductByCategory(categoryId, categoryName);
+        } else {
+            JOptionPane.showMessageDialog(this, "Lỗi: Không tìm thấy Form kết nối!");
+        }
     }
 
     /**
@@ -31,30 +132,38 @@ public class HomePage extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
 
-        setPreferredSize(new java.awt.Dimension(600, 600));
+        jPanel1.setLayout(new java.awt.GridLayout(0, 2, 10, 10));
 
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setIcon(new javax.swing.ImageIcon("C:\\Users\\vanminh\\Downloads\\background.jpg")); // NOI18N
+        jLabel1.setFont(new java.awt.Font("Helvetica", 3, 36)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(0, 0, 255));
+        jLabel1.setText("Cửa hàng Cường Thuận");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 600, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(111, 111, 111)
+                .addComponent(jLabel1)
+                .addContainerGap(120, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(68, 68, 68)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(40, 40, 40)
                 .addComponent(jLabel1)
-                .addContainerGap(119, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 43, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 500, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
 }

@@ -155,56 +155,58 @@ public class CartDao implements Dao<Cart> {
         return false;
     }
 
-    public boolean checkout(int userId, String address, String method) {
-        Connection conn = myConnection.getConnection();
-        try {
-            conn.setAutoCommit(false);
-            
-            // 1. Tính tổng
-            double total = 0;
-            String sqlTotal = "select sum(c.quantity * p.price) from cart c join products p on c.product_id = p.product_id where c.user_id = ?";
-            PreparedStatement ps1 = conn.prepareStatement(sqlTotal);
-            ps1.setInt(1, userId);
-            ResultSet rs1 = ps1.executeQuery();
-            if (rs1.next()) total = rs1.getDouble(1);
-            if (total <= 0) return false;
+    // Sửa tiêu đề hàm để nhận thêm tên khách hàng
+public boolean checkout(int userId, String address, String method, String customerName) {
+    Connection conn = myConnection.getConnection();
+    try {
+        conn.setAutoCommit(false);
+        
+        // 1. Tính tổng (Giữ nguyên logic cũ)
+        double total = 0;
+        String sqlTotal = "select sum(c.quantity * p.price) from cart c join products p on c.product_id = p.product_id where c.user_id = ?";
+        PreparedStatement ps1 = conn.prepareStatement(sqlTotal);
+        ps1.setInt(1, userId);
+        ResultSet rs1 = ps1.executeQuery();
+        if (rs1.next()) total = rs1.getDouble(1);
+        if (total <= 0) return false;
 
-            // 2. Tạo Order
-            int orderId = -1;
-            String sqlOrder = "insert into orders(user_id, total_amount, shipping_address, payment_method) values(?, ?, ?, ?)";
-            PreparedStatement ps2 = conn.prepareStatement(sqlOrder, Statement.RETURN_GENERATED_KEYS);
-            ps2.setInt(1, userId);
-            ps2.setDouble(2, total);
-            ps2.setString(3, address);
-            ps2.setString(4, method);
-            ps2.executeUpdate();
-            ResultSet rs2 = ps2.getGeneratedKeys();
-            if (rs2.next()) orderId = rs2.getInt(1);
+        // 2. Tạo Order - ĐÃ SỬA: Thêm cột 'name' vào câu lệnh INSERT
+        int orderId = -1;
+        String sqlOrder = "insert into orders(user_id, total_amount, shipping_address, payment_method, name) values(?, ?, ?, ?, ?)";
+        PreparedStatement ps2 = conn.prepareStatement(sqlOrder, Statement.RETURN_GENERATED_KEYS);
+        ps2.setInt(1, userId);
+        ps2.setDouble(2, total);
+        ps2.setString(3, address);
+        ps2.setString(4, method);
+        ps2.setString(5, customerName); // Gán tên khách hàng vào đây
+        ps2.executeUpdate();
+        
+        ResultSet rs2 = ps2.getGeneratedKeys();
+        if (rs2.next()) orderId = rs2.getInt(1);
 
-            // 3. Move sang Details
-            String sqlDetail = "insert into order_details(order_id, product_id, quantity, price_at_purchase) "
-                             + "select ?, c.product_id, c.quantity, p.price from cart c "
-                             + "join products p on c.product_id = p.product_id where c.user_id = ?";
-            PreparedStatement ps3 = conn.prepareStatement(sqlDetail);
-            ps3.setInt(1, orderId);
-            ps3.setInt(2, userId);
-            ps3.executeUpdate();
+        // 3. Move sang Details & 4. Xóa Cart (Giữ nguyên logic cũ của bạn)
+        String sqlDetail = "insert into order_details(order_id, product_id, quantity, price_at_purchase) "
+                         + "select ?, c.product_id, c.quantity, p.price from cart c "
+                         + "join products p on c.product_id = p.product_id where c.user_id = ?";
+        PreparedStatement ps3 = conn.prepareStatement(sqlDetail);
+        ps3.setInt(1, orderId);
+        ps3.setInt(2, userId);
+        ps3.executeUpdate();
 
-            // 4. Xóa Cart
-            String sqlDelete = "delete from cart where user_id = ?";
-            PreparedStatement ps4 = conn.prepareStatement(sqlDelete);
-            ps4.setInt(1, userId);
-            ps4.executeUpdate();
+        String sqlDelete = "delete from cart where user_id = ?";
+        PreparedStatement ps4 = conn.prepareStatement(sqlDelete);
+        ps4.setInt(1, userId);
+        ps4.executeUpdate();
 
-            conn.commit();
-            conn.setAutoCommit(true);
-            return true;
-        } catch (Exception e) {
-            try { conn.rollback(); conn.setAutoCommit(true); } catch (SQLException ex) {}
-            e.printStackTrace();
-        }
-        return false;
+        conn.commit();
+        conn.setAutoCommit(true);
+        return true;
+    } catch (Exception e) {
+        try { conn.rollback(); conn.setAutoCommit(true); } catch (SQLException ex) {}
+        e.printStackTrace();
     }
+    return false;
+}
 
     @Override
     public boolean update(Cart t) {
@@ -241,4 +243,16 @@ public class CartDao implements Dao<Cart> {
         }
         return false;
     }
+    public boolean deleteByUserAndProduct(int userId, int productId) {
+    Connection conn = myConnection.getConnection();
+    String sql = "DELETE FROM " + TABLE_NAME + " WHERE user_id = ? AND product_id = ?";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, userId);
+        ps.setInt(2, productId);
+        return ps.executeUpdate() > 0;
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return false;
+}
 }

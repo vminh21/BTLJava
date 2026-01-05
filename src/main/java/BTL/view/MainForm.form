@@ -138,6 +138,9 @@
             <Property name="text" type="java.lang.String" value="S&#x1ea3;n Ph&#x1ea9;m"/>
             <Property name="borderPainted" type="boolean" value="false"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnProductActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btnCategory">
           <Properties>
@@ -150,6 +153,9 @@
             <Property name="text" type="java.lang.String" value="H&#xf3;a &#x111;&#x1a1;n"/>
             <Property name="borderPainted" type="boolean" value="false"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnOrderActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btnStaff">
           <Properties>
@@ -165,12 +171,18 @@
             <Property name="text" type="java.lang.String" value="Th&#xf4;ng b&#xe1;o"/>
             <Property name="borderPainted" type="boolean" value="false"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnNotificationActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btnSatistical">
           <Properties>
             <Property name="text" type="java.lang.String" value="Th&#x1ed1;ng k&#xea;"/>
             <Property name="borderPainted" type="boolean" value="false"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSatisticalActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btnLogout">
           <Properties>

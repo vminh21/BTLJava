@@ -22,6 +22,10 @@ public class MainForm extends javax.swing.JFrame {
     private StaffCRUD customerCRUD;
     private SuppliersCRUD suppliersCRUD;
     private Account account;
+    private OrdersForm ordersForm;
+    private NotificationCRUD notificationCRUD;
+    private StatisticalCRUD statisticalCRUD;
+    private ProductForm productForm;
     public MainForm(Users user) {
         this.currentUser = user;
         initComponents();
@@ -55,6 +59,24 @@ public class MainForm extends javax.swing.JFrame {
             suppliersCRUD = new SuppliersCRUD(this);
         }
         showPanel(suppliersCRUD, btnSuppliers);
+    }
+    public void setOrderForm(){
+        if(ordersForm == null){
+            ordersForm = new OrdersForm(this);
+        }
+        showPanel(ordersForm, btnOrder);
+    }
+    public void setNotificationCRUD(){
+        if(notificationCRUD == null){
+            notificationCRUD = new NotificationCRUD(this, this.currentUser);
+        }
+        showPanel(notificationCRUD, btnNotification);
+    }
+    public void setStatisticalCRUD(){
+        if(statisticalCRUD == null){
+            statisticalCRUD = new StatisticalCRUD(this);
+        }
+        showPanel(statisticalCRUD, btnSatistical);
     }
     public void setupAccount(){
         if(account == null){
@@ -94,6 +116,18 @@ public class MainForm extends javax.swing.JFrame {
         btnSatistical.setBackground(new Color(255,255,255));
         btnSuppliers.setBackground(new Color(255,255,255));
         btnTk.setBackground(new Color(255,255,255));
+    }
+    public void showProductByCategory(int catId, String catName) {
+        // 1. Tạo mới ProductForm
+        if (productForm == null) {
+            productForm = new ProductForm();
+        }
+
+        // 2. Gọi hàm lọc vừa viết ở Bước 1
+        productForm.filterByCategory(catId, catName);
+
+        // 3. Hiển thị lên màn hình (Dùng lại hàm showPanel có sẵn của bạn)
+        showPanel(productForm, btnProduct);
     }
 
     /**
@@ -140,12 +174,22 @@ public class MainForm extends javax.swing.JFrame {
 
         btnProduct.setText("Sản Phẩm");
         btnProduct.setBorderPainted(false);
+        btnProduct.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnProductActionPerformed(evt);
+            }
+        });
 
         btnCategory.setText("Danh mục");
         btnCategory.setBorderPainted(false);
 
         btnOrder.setText("Hóa đơn");
         btnOrder.setBorderPainted(false);
+        btnOrder.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnOrderActionPerformed(evt);
+            }
+        });
 
         btnStaff.setText("Nhân viên");
         btnStaff.setBorderPainted(false);
@@ -157,9 +201,19 @@ public class MainForm extends javax.swing.JFrame {
 
         btnNotification.setText("Thông báo");
         btnNotification.setBorderPainted(false);
+        btnNotification.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNotificationActionPerformed(evt);
+            }
+        });
 
         btnSatistical.setText("Thống kê");
         btnSatistical.setBorderPainted(false);
+        btnSatistical.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSatisticalActionPerformed(evt);
+            }
+        });
 
         btnLogout.setText("Đăng xuất");
         btnLogout.setBorderPainted(false);
@@ -308,6 +362,45 @@ public class MainForm extends javax.swing.JFrame {
         // TODO add your handling code here:
         setupAccount();
     }//GEN-LAST:event_btnTkActionPerformed
+
+    private void btnOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOrderActionPerformed
+        // TODO add your handling code here:
+        setOrderForm();
+    }//GEN-LAST:event_btnOrderActionPerformed
+
+    private void btnNotificationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNotificationActionPerformed
+        // TODO add your handling code here:
+        setNotificationCRUD();
+    }//GEN-LAST:event_btnNotificationActionPerformed
+
+    private void btnSatisticalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSatisticalActionPerformed
+        // TODO add your handling code here:
+        setStatisticalCRUD();
+        
+    }//GEN-LAST:event_btnSatisticalActionPerformed
+
+    private void btnProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProductActionPerformed
+        // TODO add your handling code here:
+        System.out.println("--- Bắt đầu mở trang Sản phẩm ---");
+        try {
+            // 1. Kiểm tra khởi tạo
+            if (productForm == null) {
+                System.out.println("Đang khởi tạo ProductForm mới...");
+                productForm = new ProductForm();
+            }
+
+            // 2. Gọi hàm hiển thị
+            System.out.println("Đang gọi showPanel...");
+            showPanel(productForm, btnProduct);
+
+            System.out.println("--- Thành công! ---");
+
+        } catch (Exception e) {
+            // Nếu có lỗi ngầm, nó sẽ hiện thông báo lên màn hình cho bạn biết
+            e.printStackTrace(); // In chi tiết lỗi xuống cửa sổ Output bên dưới
+            javax.swing.JOptionPane.showMessageDialog(this, "Lỗi không mở được trang Sản phẩm:\n" + e.getMessage());
+        }
+    }//GEN-LAST:event_btnProductActionPerformed
 
     /**
      * @param args the command line arguments

@@ -16,7 +16,7 @@ import java.util.Optional;
 
 /**
  *
- * @author vanminh
+     * @author vanminh
  */
 
 public class NotificationDao implements Dao<Notification> {
@@ -153,5 +153,9 @@ public class NotificationDao implements Dao<Notification> {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public List<Notification> getAll() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

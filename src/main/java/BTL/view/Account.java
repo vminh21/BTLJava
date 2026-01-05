@@ -22,33 +22,29 @@ public class Account extends javax.swing.JPanel {
         initComponents();
         this.customersForm = customersForm;
         cbxAddress.setModel(new DefaultComboBoxModel<>(new String[] { 
-        "Hà Nội", "TP.HCM", "Đà Nẵng", "Cần Thơ", "Hải Phòng", "Thanh Hóa" 
+        "Hà Nội", "Nam Định", "Thái Bình", "Ninh Bình", "Hải Phòng", 
+        "Đà Nẵng", "TP. Hồ Chí Minh", "Cần Thơ", "Thanh Hóa", "Nghệ An", 
+        "Quảng Ninh", "Lào Cai", "Huế", "Khánh Hòa", "Lâm Đồng" 
     }));
     }
     public Account(MainForm mainForm) {
         initComponents();
         this.mainForm = mainForm;
         cbxAddress.setModel(new DefaultComboBoxModel<>(new String[] { 
-        "Hà Nội", "TP.HCM", "Đà Nẵng", "Cần Thơ", "Hải Phòng", "Thanh Hóa" 
+        "Hà Nội", "Nam Định", "Thái Bình", "Ninh Bình", "Hải Phòng", 
+        "Đà Nẵng", "TP. Hồ Chí Minh", "Cần Thơ", "Thanh Hóa", "Nghệ An", 
+        "Quảng Ninh", "Lào Cai", "Huế", "Khánh Hòa", "Lâm Đồng" 
     }));
     }
     public void setProfileData(Users user) {
-        this.currentUser = user; // QUAN TRỌNG: Lưu lại đối tượng để tí nữa nhấn Sửa còn biết ID
-        
-        // 1. Điền các ô Text
+        this.currentUser = user;
         txtName.setText(user.getFullName());
         txtEmail.setText(user.getEmail());
         txtPhone.setText(user.getPhoneNumber());
-
-        // 2. Chọn địa chỉ trong ComboBox (nhớ add sẵn data cho cbxAddress trong initComponents)
         cbxAddress.setSelectedItem(user.getAddress());
-
-        // 3. Chọn Giới tính (RadioButtons)
         if ("Nam".equalsIgnoreCase(user.getGender())) rbtNam.setSelected(true);
         else if ("Nữ".equalsIgnoreCase(user.getGender())) rbtNu.setSelected(true);
         else rbtKhac.setSelected(true);
-
-        // 4. Khóa ô Email không cho sửa
         txtEmail.setEditable(false); 
     }
 
@@ -198,25 +194,22 @@ public class Account extends javax.swing.JPanel {
     private void btnSuaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSuaActionPerformed
         // TODO add your handling code here:
         btnSua.setFocusable(false);
-        // 1. Kiểm tra dữ liệu đầu vào cơ bản
         if (txtName.getText().trim().isEmpty() || txtPhone.getText().trim().isEmpty()) {
             javax.swing.JOptionPane.showMessageDialog(this, "Họ tên và Số điện thoại không được để trống!");
             return;
         }
 
-        // 2. Xử lý mật khẩu (Chỉ cập nhật nếu khách có nhập mật khẩu mới)
-        String pass = txtPassword.getText().trim(); // Do anh đặt là JTextField
-        String confirm = new String(txtComfirmPassword.getPassword()).trim(); // Do anh đặt là JPasswordField
+        String pass = new String(txtPassword.getPassword()).trim(); 
+        String confirm = new String(txtComfirmPassword.getPassword()).trim();
 
         if (!pass.isEmpty()) {
             if (!pass.equals(confirm)) {
                 javax.swing.JOptionPane.showMessageDialog(this, "Mật khẩu xác nhận không khớp!");
                 return;
             }
-            currentUser.setPasswordHash(pass); // Cập nhật pass mới vào object
+            currentUser.setPasswordHash(pass);
         }
 
-        // 3. Đổ dữ liệu mới từ các ô nhập liệu vào object currentUser
         currentUser.setFullName(txtName.getText().trim());
         currentUser.setPhoneNumber(txtPhone.getText().trim());
         currentUser.setAddress(cbxAddress.getSelectedItem().toString());
@@ -226,11 +219,8 @@ public class Account extends javax.swing.JPanel {
         else if (rbtNu.isSelected()) gender = "Nữ";
         currentUser.setGender(gender);
 
-        // 4. Gọi DAO để update vào Database
         if (usersDao.update(currentUser)) {
             javax.swing.JOptionPane.showMessageDialog(this, "Cập nhật hồ sơ thành công!");
-            
-            // Xóa trắng ô mật khẩu sau khi sửa xong cho an toàn
             txtPassword.setText("");
             txtComfirmPassword.setText("");
         } else {

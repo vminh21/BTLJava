@@ -10,10 +10,11 @@ import java.sql.Timestamp;
  *
  * @author vanminh
  */
-public class Orders {
+public class Orders {   
     private int orderId;
     private int userId;
     private double totalAmount;
+    private String name;
     private String status;
     private String shippingAddress;
     private String paymentMethod;
@@ -45,6 +46,9 @@ public class Orders {
     public void setUserId(int userId) {
         this.userId = userId;
     }
+    
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
     public double getTotalAmount() {
         return totalAmount;
@@ -88,7 +92,7 @@ public class Orders {
 
     @Override
     public String toString() {
-        return "Orders{" + "orderId=" + orderId + ", userId=" + userId + ", totalAmount=" + totalAmount + ", status=" + status + ", shippingAddress=" + shippingAddress + ", paymentMethod=" + paymentMethod + ", createdAt=" + createdAt + '}';
+        return name + " (#" + orderId + ")";
     }
     
 }

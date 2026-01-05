@@ -120,12 +120,18 @@
             <Property name="text" type="java.lang.String" value="S&#x1ea3;n Ph&#x1ea9;m"/>
             <Property name="borderPainted" type="boolean" value="false"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnProductActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btnCart">
           <Properties>
             <Property name="text" type="java.lang.String" value="Gi&#x1ecf; h&#xe0;ng"/>
             <Property name="borderPainted" type="boolean" value="false"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCartActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btnLogout">
           <Properties>

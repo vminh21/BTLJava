@@ -1,31 +1,35 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package BTL.entity;
 
-/**
- *
- * @author vanminh
- */
 public class Brands {
-    private int brandId;
+    private int brand_id; // Hoặc private int id;
     private String name;
     private String origin;
 
-    public Brands() {}
-    public Brands(int brandId, String name, String origin) {
-        this.brandId = brandId;
+    public Brands() {
+    }
+
+    public Brands(int brand_id, String name, String origin) {
+        this.brand_id = brand_id;
         this.name = name;
         this.origin = origin;
     }
 
-    public int getBrandId() {
-        return brandId;
+    // Quan trọng: DAO gọi hàm này
+    public int getBrand_id() { 
+        return brand_id; 
+    }
+    
+    // Nếu bạn dùng getId() thì sửa DAO thành .getId() nhé
+    public int getId() {
+        return brand_id;
     }
 
-    public void setBrandId(int brandId) {
-        this.brandId = brandId;
+    public void setBrand_id(int brand_id) {
+        this.brand_id = brand_id;
+    }
+    
+    public void setId(int id) {
+        this.brand_id = id;
     }
 
     public String getName() {
@@ -43,10 +47,4 @@ public class Brands {
     public void setOrigin(String origin) {
         this.origin = origin;
     }
-
-    @Override
-    public String toString() {
-        return "Brands{" + "brandId=" + brandId + ", name=" + name + ", origin=" + origin + '}';
-    }
-    
 }

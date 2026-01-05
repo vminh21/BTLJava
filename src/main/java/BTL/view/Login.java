@@ -5,7 +5,9 @@
 package BTL.view;
 
 import BTL.bussiness.UsersDao;
+import BTL.entity.Session;
 import BTL.entity.Users;
+import java.awt.Cursor;
 import java.util.Optional;
 import javax.swing.JOptionPane;
 
@@ -17,9 +19,11 @@ public class Login extends javax.swing.JPanel {
 
     private final LoginForm loginForm;
     private boolean isPasswordShown = false;
+    private ForgotPassword forgotPassword;
     public Login(LoginForm loginForm) {
         initComponents();
         this.loginForm = loginForm;
+        lblForgotPassword.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
     private void resetInput(){
         txtEmailLogin.setText("");
@@ -143,9 +147,9 @@ public class Login extends javax.swing.JPanel {
                 .addGap(18, 18, 18)
                 .addComponent(jLabel3)
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtPasswordLogin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblShowPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblShowPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtPasswordLogin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jCheckBox1)
@@ -165,40 +169,37 @@ public class Login extends javax.swing.JPanel {
 
     private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
         // TODO add your handling code here:
-        // 1. Lấy dữ liệu từ giao diện
         String email = txtEmailLogin.getText().trim();
         String password = new String(txtPasswordLogin.getPassword());
 
-        // 2. Kiểm tra để trống
         if (email.isEmpty() || password.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ Email và Mật khẩu!");
             return;
         }
 
-        // 3. Gọi DAO để kiểm tra thông tin
         UsersDao usersDao = new UsersDao();
         Optional<Users> userOpt = usersDao.get(email);
         
-        // 4. Kiểm tra logic đăng nhập
         if (userOpt.isPresent()) {
             Users user = userOpt.get();
             if (user.getPasswordHash().equals(password)) {
                 JOptionPane.showMessageDialog(this, "Đăng nhập thành công!");
+                Session.userId = user.getUserId();
 
-                String role = user.getRole(); // Lấy role từ đối tượng user
+                // THÊM DÒNG NÀY ĐỂ KIỂM TRA TRÊN CONSOLE
+                System.out.println(">>> LOGIN SUCCESS! Saved ID to Session: " + Session.userId);
 
-                // 5. Điều hướng theo Role
+                String role = user.getRole();
+
                 if (role.equalsIgnoreCase("customer")) {
-                    // Mở Form dành riêng cho khách hàng (ví dụ: CustomerMainForm)
                     CustomersForm customerForm = new CustomersForm(user); 
                     customerForm.setVisible(true);
                 } else {
-                    // Mở MainForm dành cho Quản lý (Admin/Staff)
                     MainForm main = new MainForm(user); 
                     main.setVisible(true);
                 }
 
-                loginForm.dispose(); // Đóng form Login
+                loginForm.dispose();
 
             } else {
                 JOptionPane.showMessageDialog(this, "Mật khẩu không chính xác!");
@@ -214,22 +215,17 @@ public class Login extends javax.swing.JPanel {
 
     private void lblForgotPasswordMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblForgotPasswordMouseClicked
         // TODO add your handling code here:
-        
+        loginForm.dispose();
+        new ForgotPassword().setVisible(true);
     }//GEN-LAST:event_lblForgotPasswordMouseClicked
 
     private void lblShowPasswordMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblShowPasswordMouseClicked
         // TODO add your handling code here:
         if (isPasswordShown) {
-        // Nếu đang hiện -> Ẩn đi (dùng ký tự chấm tròn)
         txtPasswordLogin.setEchoChar('•'); 
-        // Thay đổi icon sang hình "mắt nhắm" nếu anh có
-        // lblIcon.setIcon(new ImageIcon(getClass().getResource("/icons/eye_hide.png")));
         isPasswordShown = false;
     } else {
-        // Nếu đang ẩn -> Hiện ra (char 0 là không hiển thị ký tự thay thế)
         txtPasswordLogin.setEchoChar((char) 0);
-        // Thay đổi icon sang hình "mắt mở"
-        // lblIcon.setIcon(new ImageIcon(getClass().getResource("/icons/eye_show.png")));
         isPasswordShown = true;
     }
     }//GEN-LAST:event_lblShowPasswordMouseClicked

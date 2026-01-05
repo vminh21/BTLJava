@@ -6,6 +6,8 @@ package BTL.view;
 
 import BTL.bussiness.UsersDao;
 import BTL.entity.Users;
+import BTL.verify.NumberVerify;
+import BTL.verify.StringVerify;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
@@ -28,17 +30,18 @@ public class StaffCRUD extends javax.swing.JPanel {
         initCustom();
     }
     private void initCustom() {
-        // 1. Cài đặt Table
-        tableModel = (javax.swing.table.DefaultTableModel) tblStaff.getModel();
+        txtPhone.setInputVerifier(new NumberVerify());
+        txtName.setInputVerifier(new StringVerify());
+        tableModel = (DefaultTableModel) tblStaff.getModel();
         tableModel.setColumnIdentifiers(new Object[]{"ID", "Họ Tên", "Email", "Số ĐT", "Địa chỉ", "Giới tính"});
         
-        // 2. Cài đặt bộ lọc tìm kiếm (Search)
-        rowSorter = new javax.swing.table.TableRowSorter<>(tableModel);
+        // Cài đặt bộ lọc tìm kiếm (Search)
+        rowSorter = new TableRowSorter<>(tableModel);
         tblStaff.setRowSorter(rowSorter);
-        
-        // 3. Cài đặt ComboBox
         cbxAddress.setModel(new DefaultComboBoxModel<>(new String[] { 
-            "Hà Nội", "TP.HCM", "Đà Nẵng", "Cần Thơ", "Hải Phòng", "Thanh Hóa" 
+            "Hà Nội", "Nam Định", "Thái Bình", "Ninh Bình", "Hải Phòng", 
+            "Đà Nẵng", "TP. Hồ Chí Minh", "Cần Thơ", "Thanh Hóa", "Nghệ An", 
+            "Quảng Ninh", "Lào Cai", "Huế", "Khánh Hòa", "Lâm Đồng" 
         }));
         cbxSearch.setModel(new DefaultComboBoxModel<>(new String[] { 
             "Tất cả", "Tên", "Email", "Số điện thoại" 
@@ -50,7 +53,6 @@ public class StaffCRUD extends javax.swing.JPanel {
     private void loadData() {
         tableModel.setRowCount(0);
         usersDao.getall().forEach(u -> {
-            // Chỉ load những người là nhân viên (staff)
             if ("staff".equalsIgnoreCase(u.getRole())) {
                 tableModel.addRow(new Object[]{
                     u.getUserId(), u.getFullName(), u.getEmail(), 
@@ -64,7 +66,7 @@ public class StaffCRUD extends javax.swing.JPanel {
         if (rbtNam.isSelected()) return "Nam";
         if (rbtNu.isSelected()) return "Nữ";
         if (rbtKhac.isSelected()) return "Khác";
-        return "Nam"; // Mặc định
+        return "Nam";
     }
 
     private void setupSearchEvent() {
@@ -304,7 +306,6 @@ public class StaffCRUD extends javax.swing.JPanel {
 
     private void btnThemNVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThemNVActionPerformed
         // TODO add your handling code here:
-        // Truyền null vào passwordHash để hàm tạo tự gán "123456" như anh muốn
         Users u = new BTL.entity.Users(
             0, 
             txtName.getText().trim(), 
@@ -332,7 +333,7 @@ public class StaffCRUD extends javax.swing.JPanel {
         
         int id = (int) tblStaff.getValueAt(row, 0);
         // Khi sửa, ta giữ nguyên logic role "staff" bên trong entity
-        BTL.entity.Users u = new BTL.entity.Users(
+        Users u = new Users(
             id, 
             txtName.getText().trim(), 
             txtEmail.getText().trim(), 
@@ -374,25 +375,23 @@ public class StaffCRUD extends javax.swing.JPanel {
 
     private void tblStaffMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblStaffMouseClicked
         // TODO add your handling code here:
-        // 1. Lấy chỉ số dòng đang được chọn trên giao diện
         int row = tblStaff.getSelectedRow();
         
-        // 2. Kiểm tra nếu có dòng được chọn (tránh lỗi click ra ngoài)
+        //  Kiểm tra nếu có dòng được chọn (tránh lỗi click ra ngoài)
         if (row != -1) {
             // QUAN TRỌNG: Chuyển đổi index từ View sang Model vì anh có dùng bộ lọc tìm kiếm
             int modelRow = tblStaff.convertRowIndexToModel(row);
             
-            // 3. Đổ dữ liệu từ TableModel vào các JTextField
-            // Cột 0 là ID (ẩn hoặc không hiện lên form), bắt đầu từ cột 1 là Họ Tên
+            // Đổ dữ liệu từ TableModel vào các JTextField
             txtName.setText(tableModel.getValueAt(modelRow, 1).toString());
             txtEmail.setText(tableModel.getValueAt(modelRow, 2).toString());
             txtPhone.setText(tableModel.getValueAt(modelRow, 3).toString());
             
-            // 4. Đổ dữ liệu vào ComboBox Địa chỉ
+            // Đổ dữ liệu vào ComboBox Địa chỉ
             String address = tableModel.getValueAt(modelRow, 4).toString();
             cbxAddress.setSelectedItem(address);
             
-            // 5. Đổ dữ liệu vào RadioButton Giới tính
+            // Đổ dữ liệu vào RadioButton Giới tính
             String gender = tableModel.getValueAt(modelRow, 5).toString();
             if ("Nam".equalsIgnoreCase(gender)) {
                 rbtNam.setSelected(true);

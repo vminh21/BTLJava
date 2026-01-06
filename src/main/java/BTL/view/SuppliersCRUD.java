@@ -48,7 +48,7 @@ public class SuppliersCRUD extends javax.swing.JPanel {
             "Quảng Ninh", "Lào Cai", "Huế", "Khánh Hòa", "Lâm Đồng" 
         }));
         cbxSearch.setModel(new DefaultComboBoxModel<>(new String[] { 
-            "Tất cả", "Tên", "Email", "Số điện thoại" 
+            "Tất cả", "Tên", "Số điện thoại", "Email" 
         }));
 
         loadData();
@@ -77,17 +77,26 @@ public class SuppliersCRUD extends javax.swing.JPanel {
             public void insertUpdate(javax.swing.event.DocumentEvent e) { search(); }
             public void removeUpdate(javax.swing.event.DocumentEvent e) { search(); }
             public void changedUpdate(javax.swing.event.DocumentEvent e) { search(); }
-            private void search() {
+        });
+        cbxSearch.addActionListener(e -> search());
+    }
+    private void search() {
                 String text = txtSearch.getText();
+                // Lấy vị trí mục đang chọn trong ComboBox (0: Tất cả, 1: Tên, 2: Email, 3: SĐT)
+                int selectedIndex = cbxSearch.getSelectedIndex(); 
+
                 if (text.trim().length() == 0) {
                     rowSorter.setRowFilter(null);
                 } else {
-                    // Tìm kiếm không phân biệt hoa thường (?i)
-                    rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+                    String pattern = "(?i)" + text;
+
+                    if (selectedIndex == 0) {
+                        rowSorter.setRowFilter(RowFilter.regexFilter(pattern));
+                    } else {
+                        rowSorter.setRowFilter(RowFilter.regexFilter(pattern, selectedIndex));
+                    }
                 }
             }
-        });
-    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

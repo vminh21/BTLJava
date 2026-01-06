@@ -6,6 +6,8 @@ package BTL.view;
 
 import BTL.bussiness.UsersDao;
 import BTL.entity.Users;
+import BTL.verify.EmailVerify;
+import BTL.verify.StringVerify;
 import javax.swing.DefaultComboBoxModel;
 
 /**
@@ -20,6 +22,9 @@ public class Account extends javax.swing.JPanel {
     private CustomersForm customersForm;
     public Account(CustomersForm customersForm) {
         initComponents();
+        txtName.setInputVerifier(new StringVerify());
+        txtEmail.setInputVerifier(new EmailVerify());
+        txtPhone.setInputVerifier(new EmailVerify());
         this.customersForm = customersForm;
         cbxAddress.setModel(new DefaultComboBoxModel<>(new String[] { 
         "Hà Nội", "Nam Định", "Thái Bình", "Ninh Bình", "Hải Phòng", 

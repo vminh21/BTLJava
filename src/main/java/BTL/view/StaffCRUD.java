@@ -13,7 +13,9 @@ import java.util.Optional;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.InputVerifier;
 import javax.swing.JOptionPane;
+import javax.swing.RowFilter;
 import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 
@@ -36,12 +38,8 @@ public class StaffCRUD extends javax.swing.JPanel {
         initCustom();
     }
     private void initCustom() {
-        txtPhone.setInputVerifier(new NumberVerify());
-        txtName.setInputVerifier(new StringVerify());
         tableModel = (DefaultTableModel) tblStaff.getModel();
         tableModel.setColumnIdentifiers(new Object[]{"ID", "Họ Tên", "Email", "Số ĐT", "Địa chỉ", "Giới tính"});
-        
-        // Cài đặt bộ lọc tìm kiếm (Search)
         rowSorter = new TableRowSorter<>(tableModel);
         tblStaff.setRowSorter(rowSorter);
         cbxAddress.setModel(new DefaultComboBoxModel<>(new String[] { 
@@ -76,17 +74,30 @@ public class StaffCRUD extends javax.swing.JPanel {
     }
 
     private void setupSearchEvent() {
-        txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+        txtSearch.getDocument().addDocumentListener(new DocumentListener() {
             public void insertUpdate(DocumentEvent e) { search(); }
             public void removeUpdate(DocumentEvent e) { search(); }
-            public void changedUpdate(DocumentEvent e) { search(); }
-            private void search() {
-                String text = txtSearch.getText();
-                if (text.trim().length() == 0) rowSorter.setRowFilter(null);
-                else rowSorter.setRowFilter(javax.swing.RowFilter.regexFilter("(?i)" + text));
-            }
+            public void changedUpdate(DocumentEvent e) { search(); }          
         });
+        cbxSearch.addActionListener(e -> search());
     }
+    private void search() {
+                String text = txtSearch.getText();
+                // Lấy vị trí mục đang chọn trong ComboBox (0: Tất cả, 1: Tên, 2: Email, 3: SĐT)
+                int selectedIndex = cbxSearch.getSelectedIndex(); 
+
+                if (text.trim().length() == 0) {
+                    rowSorter.setRowFilter(null);
+                } else {
+                    String pattern = "(?i)" + text;
+
+                    if (selectedIndex == 0) {
+                        rowSorter.setRowFilter(RowFilter.regexFilter(pattern));
+                    } else {
+                        rowSorter.setRowFilter(RowFilter.regexFilter(pattern, selectedIndex));
+                    }
+                }
+            }
     public void reset(){
         txtName.setText("");
         txtEmail.setText("");

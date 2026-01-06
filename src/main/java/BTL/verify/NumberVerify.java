@@ -13,27 +13,21 @@ import javax.swing.JTextField;
  *
  * @author vanminh
  */
-public class NumberVerify extends InputVerifier{
-@Override
+public class NumberVerify extends InputVerifier {
+    @Override
     public boolean verify(JComponent input) {
-        if (input instanceof JTextField) {
-            try {
-                Integer.parseInt(((JTextField)input).getText().trim());
-                return true;
-            } catch (Exception e) {
-                return false;
-            }
-        }
-        return false;
+        String text = ((JTextField) input).getText().trim();
+        if (text.isEmpty()) return true;
+        
+        return text.matches("^[0-9]+$");
     }
 
     @Override
     public boolean shouldYieldFocus(JComponent input) {
-        boolean retval = verify(input);
-        if (!retval) {
-            JOptionPane.showMessageDialog(input, "Dữ liệu trường này phải là số!!");
+        if (!verify(input)) {
+            JOptionPane.showMessageDialog(input, "Trường này bắt buộc phải là số!");
+            return false;
         }
-        return retval;
+        return true;
     }
-    
 }

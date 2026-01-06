@@ -10,6 +10,7 @@ import BTL.verify.EmailVerify;
 import BTL.verify.NumberVerify;
 import BTL.verify.StringVerify;
 import javax.crypto.NullCipher;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.InputVerifier;
 import javax.swing.JOptionPane;
 
@@ -29,15 +30,11 @@ public class Register extends javax.swing.JPanel {
         this.loginForm = loginForm;
     }
     private void initAddressData() {
-    String[] provinces = {
-        "Hà Nội", "Nam Định", "Thái Bình", "Ninh Bình", "Hải Phòng", 
-        "Đà Nẵng", "TP. Hồ Chí Minh", "Cần Thơ", "Thanh Hóa", "Nghệ An", 
-        "Quảng Ninh", "Lào Cai", "Huế", "Khánh Hòa", "Lâm Đồng"
-    };
-    cbxAddress.removeAllItems();
-    for (String province : provinces) {
-        cbxAddress.addItem(province);
-    }
+    cbxAddress.setModel(new DefaultComboBoxModel<>(new String[] { 
+            "Hà Nội", "Nam Định", "Thái Bình", "Ninh Bình", "Hải Phòng", 
+            "Đà Nẵng", "TP. Hồ Chí Minh", "Cần Thơ", "Thanh Hóa", "Nghệ An", 
+            "Quảng Ninh", "Lào Cai", "Huế", "Khánh Hòa", "Lâm Đồng" 
+        }));
 }
     private void resetInput(){
         txtName.setText("");

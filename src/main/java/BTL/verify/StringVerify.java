@@ -16,27 +16,18 @@ import javax.swing.JTextField;
 public class StringVerify extends InputVerifier {
     @Override
     public boolean verify(JComponent input) {
-        if (input instanceof JTextField) {
-            try {
-                String text = ((JTextField)input).getText().trim();
-                if (text != null && text.length() > 0) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } catch (Exception e) {
-                return false;
-            }
-        }
-        return false;
+        String text = ((JTextField) input).getText().trim();
+        if (text.isEmpty()) return true;
+        
+        return text.matches("^[a-zA-Z\\sÀ-ỹ]+$");
     }
 
     @Override
     public boolean shouldYieldFocus(JComponent input) {
-        boolean retval = verify(input);
-        if (!retval) {
-            JOptionPane.showMessageDialog(input, "Phải nhập dữ liệu trường này ít nhất 1 kí tự !!");
+        if (!verify(input)) {
+            JOptionPane.showMessageDialog(input, "Trường này chỉ được nhập chữ!");
+            return false;
         }
-        return retval;
+        return true;
     }
 }

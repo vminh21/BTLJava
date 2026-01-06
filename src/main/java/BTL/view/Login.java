@@ -185,8 +185,6 @@ public class Login extends javax.swing.JPanel {
             if (user.getPasswordHash().equals(password)) {
                 JOptionPane.showMessageDialog(this, "Đăng nhập thành công!");
                 Session.userId = user.getUserId();
-
-                // THÊM DÒNG NÀY ĐỂ KIỂM TRA TRÊN CONSOLE
                 System.out.println(">>> LOGIN SUCCESS! Saved ID to Session: " + Session.userId);
 
                 String role = user.getRole();

@@ -1,0 +1,234 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
+ */
+package BTL.view;
+
+import BTL.connect.MyConnection;
+import BTL.entity.Users;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+
+/**
+ *
+ * @author Admin
+ */
+public class OrderCus extends javax.swing.JPanel {
+    private final CustomersForm customersForm;
+    private DefaultTableModel model;
+    private Users currentUsers;
+
+    /**
+     * Creates new form OrderCus
+     */
+    public OrderCus(CustomersForm customersForm) {
+        initComponents();
+        this.customersForm = customersForm;
+        // Không cho người dùng sửa ô tên và thời gian
+        txtName.setEditable(false);
+        txtTime.setEditable(false);
+        
+        model = new DefaultTableModel();
+        model.setColumnIdentifiers(new Object[]{"Sản phẩm", "Số lượng", "Đơn giá", "Thành tiền"});
+        jTable1.setModel(model);
+    }
+    public void showInvoice(String fullName, int orderId) {
+    txtName.setText(fullName);
+    
+    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+    txtTime.setText(sdf.format(new Date()));
+
+    // Khai báo công cụ định dạng số (ngăn cách hàng nghìn, không dùng số mũ)
+    java.text.DecimalFormat df = new java.text.DecimalFormat("#,###");
+
+    model.setRowCount(0);
+    try {
+        Connection conn = MyConnection.getInstance().getConnection();
+        String sql = "SELECT p.name, od.quantity, od.price_at_purchase " +
+                     "FROM order_details od JOIN products p ON od.product_id = p.product_id " +
+                     "WHERE od.order_id = ?";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setInt(1, orderId);
+        ResultSet rs = ps.executeQuery();
+        
+        long total = 0; // Nên dùng kiểu long cho biến tổng
+        while (rs.next()) {
+            // Lấy giá trị và ép về long ngay để tính toán
+            long price = (long) rs.getDouble("price_at_purchase");
+            int qty = rs.getInt("quantity");
+            long subtotal = price * qty;
+            total += subtotal;
+            
+            // QUAN TRỌNG: Dùng df.format() để chuyển số thành chuỗi định dạng đẹp
+            model.addRow(new Object[]{
+                rs.getString("name"), 
+                qty, 
+                df.format(price), 
+                df.format(subtotal)
+            });
+        }
+        // Định dạng dòng tổng cộng
+        model.addRow(new Object[]{"TỔNG CỘNG", "", "", df.format(total) + " VNĐ"});
+        
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+    public void loadLatestOrder(String customerName, int orderId) {
+    // 1. Đẩy tên người dùng đang đăng nhập lên TextField
+    txtName.setText(customerName);
+    
+    // 2. Lấy thời gian hiện tại để hiển thị thời gian đặt hàng
+    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+    txtTime.setText(sdf.format(new Date()));
+
+    // Công cụ định dạng: Ngăn cách hàng nghìn bằng dấu phẩy, không dùng số mũ
+    java.text.DecimalFormat df = new java.text.DecimalFormat("#,###");
+
+    // 3. Đổ sản phẩm vào Table
+    DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+    model.setRowCount(0); 
+    
+    try (Connection conn = MyConnection.getInstance().getConnection()) {
+        String sql = "SELECT p.name, od.quantity, od.price_at_purchase " +
+                     "FROM order_details od JOIN products p ON od.product_id = p.product_id " +
+                     "WHERE od.order_id = ?";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setInt(1, orderId);
+        ResultSet rs = ps.executeQuery();
+        
+        long totalAmount = 0; // Biến tính tổng cuối cùng
+
+        while (rs.next()) {
+            String name = rs.getString("name");
+            int qty = rs.getInt("quantity");
+            // Ép kiểu long để tính toán chính xác tiền VNĐ
+            long price = (long) rs.getDouble("price_at_purchase");
+            long subTotal = price * qty;
+            totalAmount += subTotal;
+
+            // QUAN TRỌNG: Dùng df.format() để biến số thành Chuỗi (String) định dạng đẹp
+            model.addRow(new Object[]{
+                name, 
+                qty, 
+                df.format(price), 
+                df.format(subTotal)
+            });
+        }
+        
+        // Thêm dòng tổng cộng ở cuối bảng
+        model.addRow(new Object[]{"TỔNG CỘNG", "", "", df.format(totalAmount) + " VNĐ"});
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        txtName = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
+        txtTime = new javax.swing.JTextField();
+        lblthongbao = new javax.swing.JLabel();
+
+        setPreferredSize(new java.awt.Dimension(600, 600));
+
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane1.setViewportView(jTable1);
+
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(51, 0, 255));
+        jLabel1.setText("HÓA ĐƠN");
+
+        jLabel2.setText("Họ Tên");
+
+        jLabel3.setText("Thời gian đặt hàng");
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        this.setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(216, 216, 216)
+                                .addComponent(jLabel1))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(23, 23, 23)
+                                .addComponent(jLabel2)
+                                .addGap(18, 18, 18)
+                                .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(99, 99, 99)
+                                .addComponent(jLabel3)
+                                .addGap(18, 18, 18)
+                                .addComponent(txtTime, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 50, Short.MAX_VALUE)))
+                .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
+                .addGap(269, 269, 269)
+                .addComponent(lblthongbao, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(48, 48, 48)
+                .addComponent(jLabel1)
+                .addGap(25, 25, 25)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3)
+                    .addComponent(txtTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(49, 49, 49)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 261, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(34, 34, 34)
+                .addComponent(lblthongbao, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(94, Short.MAX_VALUE))
+        );
+    }// </editor-fold>//GEN-END:initComponents
+
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTable jTable1;
+    private javax.swing.JLabel lblthongbao;
+    private javax.swing.JTextField txtName;
+    private javax.swing.JTextField txtTime;
+    // End of variables declaration//GEN-END:variables
+}

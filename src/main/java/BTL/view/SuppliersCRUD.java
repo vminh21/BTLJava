@@ -9,6 +9,7 @@ import BTL.entity.Suppliers;
 import BTL.verify.NumberVerify;
 import BTL.verify.StringVerify;
 import java.util.List;
+import java.util.Optional;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import javax.swing.RowFilter;
@@ -50,8 +51,8 @@ public class SuppliersCRUD extends javax.swing.JPanel {
             "Tất cả", "Tên", "Email", "Số điện thoại" 
         }));
 
-        loadData(); // Đổ dữ liệu từ DB lên bảng
-        setupSearchEvent(); // Cài đặt tìm kiếm real-time
+        loadData();
+        setupSearchEvent();
     }
     private void loadData() {
         tableModel.setRowCount(0);
@@ -61,6 +62,15 @@ public class SuppliersCRUD extends javax.swing.JPanel {
                 s.getSupplierId(), s.getName(), s.getPhoneNumber(), s.getEmail(), s.getAddress()
             });
         }
+    }
+    public void reset(){
+        txtName.setText("");
+        txtPhone.setText("");
+        txtEmail.setText("");
+        txtSearch.setText("");
+        cbxAddress.setSelectedIndex(0);
+        tblSuppliers.clearSelection();
+        loadData();
     }
     private void setupSearchEvent() {
         txtSearch.getDocument().addDocumentListener(new DocumentListener() {
@@ -259,12 +269,27 @@ public class SuppliersCRUD extends javax.swing.JPanel {
 
     private void btnThemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThemActionPerformed
         // TODO add your handling code here:
-        Suppliers s = new Suppliers(0, txtName.getText().trim(), txtPhone.getText().trim(), 
-                                   txtEmail.getText().trim(), cbxAddress.getSelectedItem().toString());
+        String name = txtName.getText().trim();
+        String phone = txtPhone.getText().trim();
+        String email = txtEmail.getText().trim();
+        String address = cbxAddress.getSelectedItem().toString();
+        if (name.isEmpty() || email.isEmpty() || phone.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ các thông tin bắt buộc!");
+            return;
+        }
+        if (suppliersDao.get(email).isPresent()) {
+            JOptionPane.showMessageDialog(this, "Email nhà cung cấp này đã tồn tại, vui lòng kiểm tra lại!");
+            txtEmail.requestFocus();
+            return;
+        }
+        Suppliers s = new Suppliers(0, name, phone, email, address);
+
         if (suppliersDao.insert(s) > 0) {
             JOptionPane.showMessageDialog(this, "Thêm nhà cung cấp thành công!");
             loadData();
             btnResetActionPerformed(null);
+        } else {
+            JOptionPane.showMessageDialog(this, "Thêm thất bại. Vui lòng kiểm tra lại kết nối hoặc dữ liệu!");
         }
     }//GEN-LAST:event_btnThemActionPerformed
 
@@ -284,15 +309,34 @@ public class SuppliersCRUD extends javax.swing.JPanel {
         // TODO add your handling code here:
         int row = tblSuppliers.getSelectedRow();
         if (row == -1) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn dòng cần sửa!");
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn nhà cung cấp cần sửa trên bảng!");
             return;
         }
-        int id = (int) tblSuppliers.getValueAt(row, 0);
-        Suppliers s = new Suppliers(id, txtName.getText().trim(), txtPhone.getText().trim(), 
-                                   txtEmail.getText().trim(), cbxAddress.getSelectedItem().toString());
+        int id = Integer.parseInt(tblSuppliers.getValueAt(row, 0).toString());
+        String emailMoi = txtEmail.getText().trim();
+        Optional<Suppliers> supplierNhanDuoc = suppliersDao.get(emailMoi); 
+
+        if (supplierNhanDuoc.isPresent()) {
+            if (supplierNhanDuoc.get().getSupplierId() != id) {
+                JOptionPane.showMessageDialog(this, "Email này đã được sử dụng bởi một nhà cung cấp khác!");
+                txtEmail.requestFocus();
+                return;
+            }
+        }
+        Suppliers s = new Suppliers(
+            id, 
+            txtName.getText().trim(), 
+            txtPhone.getText().trim(), 
+            emailMoi, 
+            cbxAddress.getSelectedItem().toString()
+        );
+
         if (suppliersDao.update(s)) {
-            JOptionPane.showMessageDialog(this, "Cập nhật thành công!");
+            JOptionPane.showMessageDialog(this, "Cập nhật thông tin nhà cung cấp thành công!");
             loadData();
+            btnResetActionPerformed(null);
+        } else {
+            JOptionPane.showMessageDialog(this, "Sửa thất bại. Vui lòng kiểm tra lại kết nối!");
         }
     }//GEN-LAST:event_btnSuaActionPerformed
 
@@ -300,7 +344,7 @@ public class SuppliersCRUD extends javax.swing.JPanel {
         // TODO add your handling code here:
         int row = tblSuppliers.getSelectedRow();
         if (row != -1) {
-            Integer id = (int) tblSuppliers.getValueAt(row, 0);
+            int id = Integer.parseInt(tblSuppliers.getValueAt(row, 0).toString());
             if (JOptionPane.showConfirmDialog(this, "Xóa nhà cung cấp ID: " + id + "?", "Xác nhận", JOptionPane.YES_NO_OPTION) == 0) {
                 try {
                         boolean success = suppliersDao.delete(id);
@@ -331,6 +375,7 @@ public class SuppliersCRUD extends javax.swing.JPanel {
         txtSearch.setText("");
         cbxAddress.setSelectedIndex(0);
         tblSuppliers.clearSelection();
+        loadData();
     }//GEN-LAST:event_btnResetActionPerformed
 
 

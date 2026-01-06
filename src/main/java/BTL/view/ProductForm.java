@@ -4,184 +4,136 @@
  */
 package BTL.view;
 
-// Import file ComboItem bạn đã tạo trong entity
+import BTL.bussiness.ProductsDao;
 import BTL.entity.ComboItem;
+import BTL.entity.Products;
 import BTL.connect.MyConnection;
 import java.sql.*;
+import java.util.List;
 import java.util.Vector;
-import javax.swing.DefaultComboBoxModel; // Thêm cái này để xử lý lỗi đỏ
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.JComboBox;
-import javax.swing.JTextArea;
 
 public class ProductForm extends javax.swing.JPanel {
 
     private DefaultTableModel tblModel;
-// Kiểm tra dòng này ở cuối file ProductForm.java
+    // 1. Khai báo DAO
+    private final ProductsDao productsDao = new ProductsDao();
+
     public ProductForm() {
         initComponents();
-        // Lắng nghe thay đổi nội dung ô txtSearch để tìm kiếm ngay lập tức
-        txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            @Override
-            public void insertUpdate(javax.swing.event.DocumentEvent e) {
-                searchData();
-            }
-
-            @Override
-            public void removeUpdate(javax.swing.event.DocumentEvent e) {
-                searchData();
-            }
-
-            @Override
-            public void changedUpdate(javax.swing.event.DocumentEvent e) {
-                searchData();
-            }
-        });
-        // --- SỬA LỖI ĐỎ COMBOBOX BẰNG CODE ---
-        // Ép kiểu lại model cho 3 ComboBox để nó nhận được ComboItem
+        txtMota.setLineWrap(true);       // Tự động xuống dòng
+        txtMota.setWrapStyleWord(true);
+        // Setup ban đầu
         cbLoai.setModel(new DefaultComboBoxModel<>());
         cbThuonghieu.setModel(new DefaultComboBoxModel<>());
         cbNsx.setModel(new DefaultComboBoxModel<>());
-        // -------------------------------------
 
         initTable();
-        loadComboBoxes();
+        // Không cần gọi loadDataToTable() ở đây nữa vì sự kiện bên dưới sẽ lo việc đó
+        // loadComboBoxes(); 
+        // loadDataToTable(); 
+        setupEvents();
+
+    }
+    // Hàm này làm mới toàn bộ dữ liệu (Public để bên ngoài gọi được nếu cần)
+    public void refreshData() {
+        // 1. Xóa trắng các ô nhập
+        txtTensp.setText("");
+        txtGia.setText("");
+        txtSoluong.setText("");
+        txtMota.setText("");
+        txtSearch.setText("");
+        
+        // 2. Load lại ComboBox (Đề phòng có danh mục mới thêm bên kia)
+        loadComboBoxes(); 
+        
+        // 3. Reset ComboBox về phần tử đầu
+        if (cbLoai.getItemCount() > 0) cbLoai.setSelectedIndex(0);
+        if (cbThuonghieu.getItemCount() > 0) cbThuonghieu.setSelectedIndex(0);
+        if (cbNsx.getItemCount() > 0) cbNsx.setSelectedIndex(0);
+        
+        // 4. Load lại bảng từ Database
         loadDataToTable();
-        // Code thêm sự kiện click chuột thủ công
-        jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                // Gọi hàm đổ dữ liệu
-                bindingData();
-            }
-        });
+        
+        // 5. Reset các trạng thái khác
+        jLabel1.setText("Quản lí sản phẩm");
+        jTable1.clearSelection();
     }
 
-    // 1. Cấu hình bảng
+  
+
     private void initTable() {
-        tblModel = new DefaultTableModel();
-        String[] columns = new String[]{"ID", "Tên SP", "Giá", "Số lượng", "Danh mục", "Thương hiệu", "NSX", "Mô tả"};
-        tblModel.setColumnIdentifiers(columns);
+        tblModel = new DefaultTableModel(
+            new String[]{"ID", "Tên SP", "Giá", "Số lượng", "Danh mục", "Thương hiệu", "NSX", "Mô tả"}, 0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int col) { return false; }
+        };
         jTable1.setModel(tblModel);
     }
 
-    // 2. Load dữ liệu vào ComboBox
-    private void loadComboBoxes() {
-        try {
-            Connection conn = MyConnection.getInstance().getConnection();
-            Statement st = conn.createStatement();
+    private void setupEvents() {
+        // Tìm kiếm ngay khi gõ
+        txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { searchData(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { searchData(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { searchData(); }
+        });
 
-            // Load Danh mục
-            DefaultComboBoxModel boxModel1 = (DefaultComboBoxModel) cbLoai.getModel();
-            boxModel1.removeAllElements();
-            ResultSet rs = st.executeQuery("SELECT category_id, name FROM categories");
-            while (rs.next()) {
-                // Giờ thì dòng này sẽ hết đỏ 100%
-                boxModel1.addElement(new ComboItem(rs.getInt("category_id"), rs.getString("name")));
-            }
-
-            // Load Thương hiệu
-            DefaultComboBoxModel boxModel2 = (DefaultComboBoxModel) cbThuonghieu.getModel();
-            boxModel2.removeAllElements();
-            rs = st.executeQuery("SELECT brand_id, name FROM brands");
-            while (rs.next()) {
-                boxModel2.addElement(new ComboItem(rs.getInt("brand_id"), rs.getString("name")));
-            }
-
-            // Load NSX
-            DefaultComboBoxModel boxModel3 = (DefaultComboBoxModel) cbNsx.getModel();
-            boxModel3.removeAllElements();
-            rs = st.executeQuery("SELECT supplier_id, name FROM suppliers");
-            while (rs.next()) {
-                boxModel3.addElement(new ComboItem(rs.getInt("supplier_id"), rs.getString("name")));
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // Click bảng đổ dữ liệu lên Form
+        jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) { bindingData(); }
+        });
     }
 
-    // 3. Load dữ liệu lên Bảng
+    // --- CÁC HÀM LOAD DỮ LIỆU DÙNG DAO ---
+
     private void loadDataToTable() {
-        try {
-            tblModel.setRowCount(0);
-            Connection conn = MyConnection.getInstance().getConnection();
-            String sql = "SELECT p.product_id, p.name, p.price, p.stock_quantity, p.description, "
-                    + "c.name as cat_name, b.name as brand_name, s.name as sup_name "
-                    + "FROM products p "
-                    + "LEFT JOIN categories c ON p.category_id = c.category_id "
-                    + "LEFT JOIN brands b ON p.brand_id = b.brand_id "
-                    + "LEFT JOIN suppliers s ON p.supplier_id = s.supplier_id";
-
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-
-            while (rs.next()) {
-                Vector<Object> row = new Vector<>();
-                row.add(rs.getInt("product_id"));
-                row.add(rs.getString("name"));
-                row.add((long) rs.getDouble("price"));
-                row.add(rs.getInt("stock_quantity"));
-                row.add(rs.getString("cat_name"));
-                row.add(rs.getString("brand_name"));
-                row.add(rs.getString("sup_name"));
-                row.add(rs.getString("description"));
-                tblModel.addRow(row);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        List<Products> list = productsDao.getall();
+        fillTable(list);
     }
 
     private void searchData() {
         String keyword = txtSearch.getText().trim();
-        try {
-            tblModel.setRowCount(0); // Xóa trắng bảng
-            Connection conn = MyConnection.getInstance().getConnection();
+        List<Products> list = productsDao.search(keyword);
+        fillTable(list);
+    }
 
-            // Câu SQL tìm kiếm trên tất cả các cột liên quan
-            String sql = "SELECT p.product_id, p.name, p.price, p.stock_quantity, p.description, "
-                    + "c.name as cat_name, b.name as brand_name, s.name as sup_name "
-                    + "FROM products p "
-                    + "LEFT JOIN categories c ON p.category_id = c.category_id "
-                    + "LEFT JOIN brands b ON p.brand_id = b.brand_id "
-                    + "LEFT JOIN suppliers s ON p.supplier_id = s.supplier_id "
-                    + "WHERE p.name LIKE ? "
-                    + // Theo tên
-                    "OR p.product_id LIKE ? "
-                    + // Theo ID
-                    "OR c.name LIKE ? "
-                    + // Theo thể loại
-                    "OR b.name LIKE ? "
-                    + // Theo thương hiệu
-                    "OR s.name LIKE ?";                // Theo nhà sản xuất
+    // Hàm này được gọi từ HomePage
+    public void filterByCategory(int categoryId, String categoryName) {
+        jLabel1.setText("Danh mục: " + categoryName);
+        
+        // Gọi DAO lấy list theo danh mục
+        List<Products> list = productsDao.getByCategory(categoryId);
+        fillTable(list);
 
-            PreparedStatement ps = conn.prepareStatement(sql);
-            String searchKey = "%" + keyword + "%";
+        // Chọn sẵn ComboBox
+        setSelectedComboItem(cbLoai, categoryName);
+    }
 
-            // Gán keyword cho tất cả 5 dấu hỏi chấm
-            ps.setString(1, searchKey);
-            ps.setString(2, searchKey);
-            ps.setString(3, searchKey);
-            ps.setString(4, searchKey);
-            ps.setString(5, searchKey);
+    // --- HÀM HELPER: ĐỔ DỮ LIỆU RA BẢNG ---
+    // Hàm này giúp chuyển đổi ID (từ DAO) thành Tên (lấy từ ComboBox) để hiện lên bảng
+    private void fillTable(List<Products> list) {
+        tblModel.setRowCount(0);
+        for (Products p : list) {
+            // "Mẹo": Lấy tên từ ComboBox dựa vào ID
+            String catName = getComboNameById(cbLoai, p.getCategoryId());
+            String brandName = getComboNameById(cbThuonghieu, p.getBrandId());
+            String supName = getComboNameById(cbNsx, p.getSupplierId());
 
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                Vector<Object> row = new Vector<>();
-                row.add(rs.getInt("product_id"));
-                row.add(rs.getString("name"));
-                row.add(rs.getDouble("price"));
-                row.add(rs.getInt("stock_quantity"));
-                row.add(rs.getString("cat_name"));
-                row.add(rs.getString("brand_name"));
-                row.add(rs.getString("sup_name"));
-                row.add(rs.getString("description"));
-                tblModel.addRow(row);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            tblModel.addRow(new Object[]{
+                p.getProductId(),
+                p.getName(),
+                p.getPrice(),
+                p.getStockQuantity(),
+                catName,    // Hiện Tên
+                brandName,  // Hiện Tên
+                supName,    // Hiện Tên
+                p.getDescription()
+            });
         }
     }
 
@@ -200,7 +152,6 @@ public class ProductForm extends javax.swing.JPanel {
         txtTensp = new javax.swing.JTextField();
         txtGia = new javax.swing.JTextField();
         txtSoluong = new javax.swing.JTextField();
-        txtMota = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
@@ -217,6 +168,8 @@ public class ProductForm extends javax.swing.JPanel {
         cbNsx = new javax.swing.JComboBox<>();
         jLabel9 = new javax.swing.JLabel();
         txtSearch = new javax.swing.JTextField();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        txtMota = new javax.swing.JTextArea();
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -286,6 +239,10 @@ public class ProductForm extends javax.swing.JPanel {
 
         jLabel9.setText("Tìm kiếm");
 
+        txtMota.setColumns(20);
+        txtMota.setRows(5);
+        jScrollPane2.setViewportView(txtMota);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -294,18 +251,15 @@ public class ProductForm extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(21, 21, 21)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 554, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 554, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(120, 120, 120)
                         .addComponent(jLabel9)
                         .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel1)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE)))))
-                .addGap(17, 17, 17))
+                            .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(25, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
                 .addGap(41, 41, 41)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -327,26 +281,31 @@ public class ProductForm extends javax.swing.JPanel {
                             .addComponent(btnSua, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(cbLoai, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(cbThuonghieu, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(63, 63, 63)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(txtMota)
-                    .addComponent(txtGia)
-                    .addComponent(txtSoluong, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(cbNsx, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(52, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(63, 63, 63)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtGia)
+                            .addComponent(txtSoluong, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(cbNsx, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel8)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(43, 43, 43))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(27, 27, 27)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 39, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
                     .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -370,139 +329,77 @@ public class ProductForm extends javax.swing.JPanel {
                     .addComponent(jLabel4)
                     .addComponent(jLabel6)
                     .addComponent(cbThuonghieu, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtMota, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel8)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(13, 13, 13)
+                        .addGap(31, 31, 31)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(btnRf)
-                            .addComponent(btnSua))
+                            .addComponent(btnSua)
+                            .addComponent(jLabel8))
                         .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(btnXoa)
-                            .addComponent(btnThem))))
-                .addGap(48, 48, 48))
+                            .addComponent(btnThem)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(55, 55, 55)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(119, 119, 119))
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnRfActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRfActionPerformed
-        txtTensp.setText("");
-        txtGia.setText("");
-        txtSoluong.setText("");
-        txtMota.setText("");
-
-        // Reset về mục đầu tiên
-        if (cbLoai.getItemCount() > 0) {
-            cbLoai.setSelectedIndex(0);
-        }
-        if (cbThuonghieu.getItemCount() > 0) {
-            cbThuonghieu.setSelectedIndex(0);
-        }
-        if (cbNsx.getItemCount() > 0) {
-            cbNsx.setSelectedIndex(0);
-        }
-        jLabel1.setText("Quản lí sản phẩm");
-        jTable1.clearSelection();
-        loadDataToTable(); // Gọi hàm load lại bảng
+        refreshData();
     }//GEN-LAST:event_btnRfActionPerformed
 
     private void btnSuaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSuaActionPerformed
         int row = jTable1.getSelectedRow();
         if (row < 0) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn dòng cần sửa!");
+            JOptionPane.showMessageDialog(this, "Chọn dòng cần sửa!");
             return;
         }
-
-        try {
+        
+        Products p = getFormInput();
+        if (p != null) {
+            // Lấy ID từ bảng gán vào đối tượng
             int id = Integer.parseInt(tblModel.getValueAt(row, 0).toString());
-
-            BTL.entity.ComboItem itemLoai = (BTL.entity.ComboItem) cbLoai.getSelectedItem();
-            BTL.entity.ComboItem itemHieu = (BTL.entity.ComboItem) cbThuonghieu.getSelectedItem();
-            BTL.entity.ComboItem itemNsx = (BTL.entity.ComboItem) cbNsx.getSelectedItem();
-
-            Connection conn = MyConnection.getInstance().getConnection();
-            String sql = "UPDATE products SET name=?, category_id=?, brand_id=?, supplier_id=?, price=?, stock_quantity=?, description=? WHERE product_id=?";
-            PreparedStatement ps = conn.prepareStatement(sql);
-
-            ps.setString(1, txtTensp.getText());
-            ps.setInt(2, itemLoai.getId());
-            ps.setInt(3, itemHieu.getId());
-            ps.setInt(4, itemNsx.getId());
-            ps.setDouble(5, Double.parseDouble(txtGia.getText()));
-            ps.setInt(6, Integer.parseInt(txtSoluong.getText()));
-            ps.setString(7, txtMota.getText());
-            ps.setInt(8, id);
-
-            ps.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Sửa thành công!");
-            btnRf.doClick();
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Lỗi: " + e.getMessage());
+            p.setProductId(id);
+            
+            if (productsDao.update(p)) {
+                JOptionPane.showMessageDialog(this, "Sửa thành công!");
+                btnRf.doClick();
+            } else {
+                JOptionPane.showMessageDialog(this, "Sửa thất bại!");
+            }
         }
     }//GEN-LAST:event_btnSuaActionPerformed
 
     private void btnXoaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnXoaActionPerformed
         int row = jTable1.getSelectedRow();
         if (row < 0) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn dòng cần xóa!");
+            JOptionPane.showMessageDialog(this, "Chọn dòng cần xóa!");
             return;
         }
 
-        if (JOptionPane.showConfirmDialog(this, "Bạn chắc chắn muốn xóa?", "Xác nhận", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-            try {
-                int id = Integer.parseInt(tblModel.getValueAt(row, 0).toString());
-                Connection conn = MyConnection.getInstance().getConnection();
-                PreparedStatement ps = conn.prepareStatement("DELETE FROM products WHERE product_id=?");
-                ps.setInt(1, id);
-
-                ps.executeUpdate();
+        if (JOptionPane.showConfirmDialog(this, "Xóa sản phẩm này?", "Xác nhận", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            int id = Integer.parseInt(tblModel.getValueAt(row, 0).toString());
+            if (productsDao.delete(id)) {
                 JOptionPane.showMessageDialog(this, "Đã xóa!");
                 btnRf.doClick();
-
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Lỗi: " + e.getMessage());
+            } else {
+                JOptionPane.showMessageDialog(this, "Xóa thất bại!");
             }
         }
     }//GEN-LAST:event_btnXoaActionPerformed
 
     private void btnThemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThemActionPerformed
-        try {
-            if (txtTensp.getText().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Vui lòng nhập tên sản phẩm!");
-                return;
+        Products p = getFormInput(); // Lấy dữ liệu
+        if (p != null) {
+            if (productsDao.insert(p) > 0) {
+                JOptionPane.showMessageDialog(this, "Thêm thành công!");
+                btnRf.doClick();
+            } else {
+                JOptionPane.showMessageDialog(this, "Thêm thất bại!");
             }
-
-            // Lấy ID từ ComboBox (Nhớ ép kiểu về ComboItem)
-            BTL.entity.ComboItem itemLoai = (BTL.entity.ComboItem) cbLoai.getSelectedItem();
-            BTL.entity.ComboItem itemHieu = (BTL.entity.ComboItem) cbThuonghieu.getSelectedItem();
-            BTL.entity.ComboItem itemNsx = (BTL.entity.ComboItem) cbNsx.getSelectedItem();
-
-            Connection conn = MyConnection.getInstance().getConnection();
-            String sql = "INSERT INTO products (name, category_id, brand_id, supplier_id, price, stock_quantity, description) VALUES (?, ?, ?, ?, ?, ?, ?)";
-            PreparedStatement ps = conn.prepareStatement(sql);
-
-            ps.setString(1, txtTensp.getText());
-            ps.setInt(2, itemLoai.getId());
-            ps.setInt(3, itemHieu.getId());
-            ps.setInt(4, itemNsx.getId());
-            ps.setDouble(5, Double.parseDouble(txtGia.getText()));
-            ps.setInt(6, Integer.parseInt(txtSoluong.getText()));
-            ps.setString(7, txtMota.getText());
-
-            ps.executeUpdate();
-            JOptionPane.showMessageDialog(this, "Thêm thành công!");
-
-            // Gọi nút làm mới để reset form
-            btnRf.doClick();
-
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Giá và Số lượng phải là số!");
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Lỗi: " + e.getMessage());
-            e.printStackTrace();
         }
     }//GEN-LAST:event_btnThemActionPerformed
 
@@ -510,47 +407,83 @@ public class ProductForm extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtMotaActionPerformed
 
-    private void bindingData() {
-        int row = jTable1.getSelectedRow();
-        if (row >= 0) {
-            // Cột 0 là ID
-            // Cột 1 là Tên SP -> Kiểm tra xem trên bảng cột thứ 2 có phải là Tên SP không?
-            txtTensp.setText(jTable1.getValueAt(row, 1).toString());
-
-            // Cột 2 là Giá
-            txtGia.setText(jTable1.getValueAt(row, 2).toString());
-
-            // Cột 3 là Số lượng
-            txtSoluong.setText(jTable1.getValueAt(row, 3).toString());
-
-            // Cột 4, 5, 6 là các ComboBox
-            setSelectedComboItem(cbLoai, jTable1.getValueAt(row, 4).toString());
-            setSelectedComboItem(cbThuonghieu, jTable1.getValueAt(row, 5).toString());
-            setSelectedComboItem(cbNsx, jTable1.getValueAt(row, 6).toString());
-
-            // Cột 7 là Mô tả
-            Object mota = jTable1.getValueAt(row, 7);
-            if (mota != null) {
-                // Thay thế dấu phẩy (,) thành dấu phẩy + xuống dòng (\n)
-                String hienThiMota = mota.toString().replace(",", ",\n");
-                txtMota.setText(hienThiMota);
-            } else {
-                txtMota.setText("");
-            }
+    private Products getFormInput() {
+        String ten = txtTensp.getText().trim();
+        if (ten.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Nhập tên sản phẩm đi!");
+            return null;
+        }
+        try {
+            double gia = Double.parseDouble(txtGia.getText().trim());
+            int sl = Integer.parseInt(txtSoluong.getText().trim());
+            
+            int catId = ((ComboItem) cbLoai.getSelectedItem()).getId();
+            int brandId = ((ComboItem) cbThuonghieu.getSelectedItem()).getId();
+            int supId = ((ComboItem) cbNsx.getSelectedItem()).getId();
+            
+            // ID tạm để 0
+            return new Products(0, ten, catId, brandId, supId, gia, sl, txtMota.getText(), "");
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Giá và Số lượng phải là số!");
+            return null;
         }
     }
 
-    // Hàm hỗ trợ chọn ComboBox (Dòng bạn đang bị đỏ)
-    private void setSelectedComboItem(javax.swing.JComboBox cb, String nameToSelect) {
-        if (nameToSelect == null) {
-            return;
+    // 2. Binding Data (Click bảng -> Form)
+    private void bindingData() {
+        int row = jTable1.getSelectedRow();
+        if (row >= 0) {
+            txtTensp.setText(tblModel.getValueAt(row, 1).toString());
+            txtGia.setText(tblModel.getValueAt(row, 2).toString());
+            txtSoluong.setText(tblModel.getValueAt(row, 3).toString());
+            
+            // Chọn ComboBox theo TÊN hiển thị trên bảng
+            setSelectedComboItem(cbLoai, tblModel.getValueAt(row, 4).toString());
+            setSelectedComboItem(cbThuonghieu, tblModel.getValueAt(row, 5).toString());
+            setSelectedComboItem(cbNsx, tblModel.getValueAt(row, 6).toString());
+            
+            txtMota.setText(tblModel.getValueAt(row, 7).toString());
         }
+    }
+
+    // 3. Load ComboBox (Giữ nguyên SQL vì chưa có DAO cho các bảng phụ)
+    private void loadComboBoxes() {
+        try {
+            Connection conn = MyConnection.getInstance().getConnection();
+            Statement st = conn.createStatement();
+
+            fillCombo(st, cbLoai, "SELECT category_id, name FROM categories", "category_id");
+            fillCombo(st, cbThuonghieu, "SELECT brand_id, name FROM brands", "brand_id");
+            fillCombo(st, cbNsx, "SELECT supplier_id, name FROM suppliers", "supplier_id");
+            
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+    
+    private void fillCombo(Statement st, JComboBox cb, String sql, String idCol) throws SQLException {
+        DefaultComboBoxModel model = (DefaultComboBoxModel) cb.getModel();
+        model.removeAllElements();
+        ResultSet rs = st.executeQuery(sql);
+        while(rs.next()) {
+            model.addElement(new ComboItem(rs.getInt(idCol), rs.getString("name")));
+        }
+    }
+
+    // 4. Chọn ComboBox theo tên
+    private void setSelectedComboItem(JComboBox cb, String nameToSelect) {
         for (int i = 0; i < cb.getItemCount(); i++) {
             if (cb.getItemAt(i).toString().equalsIgnoreCase(nameToSelect)) {
-                cb.setSelectedIndex(i);
-                return;
+                cb.setSelectedIndex(i); return;
             }
         }
+    }
+    
+    // 5. [QUAN TRỌNG] Lấy Tên từ ComboBox bằng ID (để hiển thị lên bảng)
+    private String getComboNameById(JComboBox cb, int id) {
+        for (int i = 0; i < cb.getItemCount(); i++) {
+            ComboItem item = (ComboItem) cb.getItemAt(i);
+            if (item.getId() == id) return item.getName();
+        }
+        return "Unknown";
     }
 
     private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {
@@ -590,52 +523,7 @@ public class ProductForm extends javax.swing.JPanel {
         /* Create and display the form */
         }
 
-    // Hàm này để gọi từ bên ngoài, giúp lọc sản phẩm theo Category_ID
-    public void filterByCategory(int categoryId, String categoryName) {
-        // 1. Đổi tên Label tiêu đề cho ngầu
-        jLabel1.setText("Danh mục: " + categoryName);
-
-        try {
-            // 2. Xóa sạch bảng cũ
-            tblModel.setRowCount(0);
-
-            // 3. Kết nối và Query có điều kiện WHERE category_id = ?
-            Connection conn = MyConnection.getInstance().getConnection();
-            String sql = "SELECT p.product_id, p.name, p.price, p.stock_quantity, p.description, "
-                    + "c.name as cat_name, b.name as brand_name, s.name as sup_name "
-                    + "FROM products p "
-                    + "LEFT JOIN categories c ON p.category_id = c.category_id "
-                    + "LEFT JOIN brands b ON p.brand_id = b.brand_id "
-                    + "LEFT JOIN suppliers s ON p.supplier_id = s.supplier_id "
-                    + "WHERE p.category_id = ?"; // <--- QUAN TRỌNG NHẤT LÀ DÒNG NÀY
-
-            java.sql.PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, categoryId); // Truyền ID danh mục vào dấu ?
-
-            ResultSet rs = ps.executeQuery();
-
-            // 4. Đổ dữ liệu vào bảng
-            while (rs.next()) {
-                Vector<Object> row = new Vector<>();
-                row.add(rs.getInt("product_id"));
-                row.add(rs.getString("name"));
-                row.add(rs.getDouble("price"));
-                row.add(rs.getInt("stock_quantity"));
-                row.add(rs.getString("cat_name"));
-                row.add(rs.getString("brand_name"));
-                row.add(rs.getString("sup_name"));
-                row.add(rs.getString("description"));
-                tblModel.addRow(row);
-            }
-
-            // 5. Chọn sẵn cái ComboBox loại sản phẩm cho đúng logic
-            // (Hàm setSelectedComboItem bạn đã có sẵn trong ProductForm rồi)
-            setSelectedComboItem(cbLoai, categoryName);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnRf;
@@ -655,9 +543,10 @@ public class ProductForm extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTable1;
     private javax.swing.JTextField txtGia;
-    private javax.swing.JTextField txtMota;
+    private javax.swing.JTextArea txtMota;
     private javax.swing.JTextField txtSearch;
     private javax.swing.JTextField txtSoluong;
     private javax.swing.JTextField txtTensp;

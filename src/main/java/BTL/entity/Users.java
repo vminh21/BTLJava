@@ -18,7 +18,7 @@ public class Users {
     private String phoneNumber;
     private String address;
     private String gender;
-    private String role; // customer, admin, staff
+    private String role;
     private Timestamp createdAt;
 
     public Users() {
@@ -35,20 +35,14 @@ public class Users {
         this.role = role;
         this.createdAt = createdAt;
     }
-    // Thêm hàm này vào lớp Users.java của anh
-    public Users(int userId,String fullName, String email, String passwordHash, String phoneNumber, String address, String gender) {
-        this.userId = userId;
-        this.fullName = fullName;
-        this.email = email;
-        if (passwordHash == null || passwordHash.trim().isEmpty()) {
-        this.passwordHash = "123456abc";
-        } else {
-        this.passwordHash = passwordHash;
-        }
-        this.phoneNumber = phoneNumber;
-        this.address = address;
-        this.gender = gender;
-        this.role = "staff";
+ 
+    public static Users createStaff(int id, String name, String email, String pass, String phone, String addr, String gender) {
+    String finalPass = (pass == null || pass.trim().isEmpty()) ? "123456abc" : pass;
+    return new Users(id, name, email, finalPass, phone, addr, gender, "staff", null);
+}
+
+    public static Users createCustomer(int id, String name, String email, String pass, String phone, String addr, String gender) {
+    return new Users(id, name, email, pass, phone, addr, gender, "customer", null);
     }
 
     public int getUserId() {

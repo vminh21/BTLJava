@@ -6,9 +6,12 @@ package BTL.view;
 
 import BTL.bussiness.UsersDao;
 import BTL.entity.Users;
+import BTL.verify.EmailVerify;
 import BTL.verify.NumberVerify;
 import BTL.verify.StringVerify;
+import java.util.Optional;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.InputVerifier;
 import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.table.DefaultTableModel;
@@ -21,11 +24,14 @@ import javax.swing.table.TableRowSorter;
 public class StaffCRUD extends javax.swing.JPanel {
     
     private DefaultTableModel tableModel;
-    private final UsersDao usersDao = new BTL.bussiness.UsersDao();
+    private final UsersDao usersDao = new UsersDao();
     private TableRowSorter<DefaultTableModel> rowSorter;
     private final MainForm mainForm;
     public StaffCRUD(MainForm mainForm) {
         initComponents();
+        txtName.setInputVerifier(new StringVerify());
+        txtPhone.setInputVerifier(new NumberVerify());
+        txtEmail.setInputVerifier(new EmailVerify());
         this.mainForm = mainForm;
         initCustom();
     }
@@ -47,8 +53,8 @@ public class StaffCRUD extends javax.swing.JPanel {
             "Tất cả", "Tên", "Email", "Số điện thoại" 
         }));
 
-        loadData(); // Load dữ liệu lần đầu
-        setupSearchEvent(); // Cài đặt tìm kiếm real-time
+        loadData();
+        setupSearchEvent();
     }
     private void loadData() {
         tableModel.setRowCount(0);
@@ -66,7 +72,7 @@ public class StaffCRUD extends javax.swing.JPanel {
         if (rbtNam.isSelected()) return "Nam";
         if (rbtNu.isSelected()) return "Nữ";
         if (rbtKhac.isSelected()) return "Khác";
-        return "Nam";
+        return "Khác";
     }
 
     private void setupSearchEvent() {
@@ -80,6 +86,15 @@ public class StaffCRUD extends javax.swing.JPanel {
                 else rowSorter.setRowFilter(javax.swing.RowFilter.regexFilter("(?i)" + text));
             }
         });
+    }
+    public void reset(){
+        txtName.setText("");
+        txtEmail.setText("");
+        txtPhone.setText("");
+        cbxAddress.setSelectedIndex(0);
+        buttonGroup1.clearSelection();
+        tblStaff.clearSelection();
+        loadData();
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -134,6 +149,10 @@ public class StaffCRUD extends javax.swing.JPanel {
             }
         });
         jScrollPane1.setViewportView(tblStaff);
+        if (tblStaff.getColumnModel().getColumnCount() > 0) {
+            tblStaff.getColumnModel().getColumn(0).setResizable(false);
+            tblStaff.getColumnModel().getColumn(0).setPreferredWidth(0);
+        }
 
         jLabel1.setFont(new java.awt.Font("Segoe UI Semibold", 0, 24)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(0, 51, 255));
@@ -169,6 +188,7 @@ public class StaffCRUD extends javax.swing.JPanel {
 
         btnThemNV.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
         btnThemNV.setText("Thêm");
+        btnThemNV.setFocusPainted(false);
         btnThemNV.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnThemNVActionPerformed(evt);
@@ -177,6 +197,7 @@ public class StaffCRUD extends javax.swing.JPanel {
 
         btnSuaNV.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
         btnSuaNV.setText("Sửa");
+        btnSuaNV.setFocusPainted(false);
         btnSuaNV.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSuaNVActionPerformed(evt);
@@ -185,6 +206,7 @@ public class StaffCRUD extends javax.swing.JPanel {
 
         btnXoaNV.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
         btnXoaNV.setText("Xóa");
+        btnXoaNV.setFocusPainted(false);
         btnXoaNV.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnXoaNVActionPerformed(evt);
@@ -193,6 +215,7 @@ public class StaffCRUD extends javax.swing.JPanel {
 
         btnLamMoiNV.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
         btnLamMoiNV.setText("Làm mới");
+        btnLamMoiNV.setFocusPainted(false);
         btnLamMoiNV.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnLamMoiNVActionPerformed(evt);
@@ -306,38 +329,65 @@ public class StaffCRUD extends javax.swing.JPanel {
 
     private void btnThemNVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThemNVActionPerformed
         // TODO add your handling code here:
-        Users u = new BTL.entity.Users(
+        String name = txtName.getText().trim();
+        String email = txtEmail.getText().trim();
+        String phone = txtPhone.getText().trim();
+        String address = cbxAddress.getSelectedItem().toString();
+        
+        if (name.isEmpty() || email.isEmpty() || phone.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ các thông tin bắt buộc!");
+            return;
+        }
+        else if (usersDao.get(email).isPresent()) {
+            JOptionPane.showMessageDialog(this, "Email này đã được sử dụng, vui lòng chọn email khác!");
+            txtEmail.requestFocus();
+            return;
+        }
+
+        Users u = Users.createStaff(
             0, 
             txtName.getText().trim(), 
             txtEmail.getText().trim(), 
-            null, // Password để null -> Constructor tự gán "123456"
+            null,
             txtPhone.getText().trim(), 
             cbxAddress.getSelectedItem().toString(), 
             getSelectedGender()
         );
-        
+
         if (usersDao.insert(u) > 0) {
             JOptionPane.showMessageDialog(this, "Thêm nhân viên thành công! (Mật khẩu mặc định: 123456)");
             loadData();
             btnLamMoiNVActionPerformed(null);
+        } else {
+            JOptionPane.showMessageDialog(this, "Thêm thất bại. Vui lòng kiểm tra lại kết nối!");
         }
     }//GEN-LAST:event_btnThemNVActionPerformed
 
     private void btnSuaNVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSuaNVActionPerformed
         // TODO add your handling code here:
+        String email = txtEmail.getText().trim();
+
         int row = tblStaff.getSelectedRow();
         if (row == -1) {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân viên cần sửa trên bảng!");
             return;
         }
+        int id = Integer.parseInt(tblStaff.getValueAt(row, 0).toString());
+        Optional<Users> userNhanDuoc = usersDao.get(email); 
+
+        if (userNhanDuoc.isPresent()) {
+            if (userNhanDuoc.get().getUserId() != id) {
+                JOptionPane.showMessageDialog(this, "Email này đã được sử dụng bởi một nhân viên khác!");
+                txtEmail.requestFocus();
+                return;
+            }
+        }
         
-        int id = (int) tblStaff.getValueAt(row, 0);
-        // Khi sửa, ta giữ nguyên logic role "staff" bên trong entity
-        Users u = new Users(
+        Users u = Users.createStaff(
             id, 
             txtName.getText().trim(), 
             txtEmail.getText().trim(), 
-            null, // Nếu sửa mà không nhập pass mới thì cứ để null/mặc định
+            null, 
             txtPhone.getText().trim(), 
             cbxAddress.getSelectedItem().toString(), 
             getSelectedGender()
@@ -346,14 +396,21 @@ public class StaffCRUD extends javax.swing.JPanel {
         if (usersDao.update(u)) {
             JOptionPane.showMessageDialog(this, "Cập nhật thông tin thành công!");
             loadData();
+            btnLamMoiNVActionPerformed(null);
+        }else {
+            JOptionPane.showMessageDialog(this, "Sửa thất bại. Vui lòng kiểm tra lại kết nối!");
         }
     }//GEN-LAST:event_btnSuaNVActionPerformed
 
     private void btnXoaNVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnXoaNVActionPerformed
         // TODO add your handling code here:
         int row = tblStaff.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân viên trên bảng để xóa!");
+            return;
+        }
         if (row != -1) {
-            int id = (int) tblStaff.getValueAt(row, 0);
+            int id = Integer.parseInt(tblStaff.getValueAt(row, 0).toString());
             int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc muốn xóa nhân viên ID: " + id + "?", "Xác nhận", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 usersDao.delete(id);
@@ -371,27 +428,19 @@ public class StaffCRUD extends javax.swing.JPanel {
         cbxAddress.setSelectedIndex(0);
         buttonGroup1.clearSelection();
         tblStaff.clearSelection();
+        loadData();
     }//GEN-LAST:event_btnLamMoiNVActionPerformed
 
     private void tblStaffMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblStaffMouseClicked
         // TODO add your handling code here:
         int row = tblStaff.getSelectedRow();
-        
-        //  Kiểm tra nếu có dòng được chọn (tránh lỗi click ra ngoài)
         if (row != -1) {
-            // QUAN TRỌNG: Chuyển đổi index từ View sang Model vì anh có dùng bộ lọc tìm kiếm
             int modelRow = tblStaff.convertRowIndexToModel(row);
-            
-            // Đổ dữ liệu từ TableModel vào các JTextField
             txtName.setText(tableModel.getValueAt(modelRow, 1).toString());
             txtEmail.setText(tableModel.getValueAt(modelRow, 2).toString());
             txtPhone.setText(tableModel.getValueAt(modelRow, 3).toString());
-            
-            // Đổ dữ liệu vào ComboBox Địa chỉ
             String address = tableModel.getValueAt(modelRow, 4).toString();
             cbxAddress.setSelectedItem(address);
-            
-            // Đổ dữ liệu vào RadioButton Giới tính
             String gender = tableModel.getValueAt(modelRow, 5).toString();
             if ("Nam".equalsIgnoreCase(gender)) {
                 rbtNam.setSelected(true);

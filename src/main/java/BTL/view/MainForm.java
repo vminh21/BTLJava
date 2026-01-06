@@ -26,6 +26,8 @@ public class MainForm extends javax.swing.JFrame {
     private NotificationCRUD notificationCRUD;
     private StatisticalCRUD statisticalCRUD;
     private ProductForm productForm;
+    private CateCRUD cateCRUD;
+    private BrandFrom brandFrom;
     public MainForm(Users user) {
         this.currentUser = user;
         initComponents();
@@ -77,6 +79,18 @@ public class MainForm extends javax.swing.JFrame {
             statisticalCRUD = new StatisticalCRUD(this);
         }
         showPanel(statisticalCRUD, btnSatistical);
+    }
+    public void setcateForm(){
+        if(cateCRUD == null){
+            cateCRUD = new CateCRUD(this);
+        }
+        showPanel(cateCRUD, btnCategory);
+    }
+    public void setbrandsForm(){
+        if(brandFrom == null){
+            brandFrom = new BrandFrom(this);
+        }
+        showPanel(brandFrom, btnBrands);
     }
     public void setupAccount(){
         if(account == null){
@@ -182,6 +196,11 @@ public class MainForm extends javax.swing.JFrame {
 
         btnCategory.setText("Danh mục");
         btnCategory.setBorderPainted(false);
+        btnCategory.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCategoryActionPerformed(evt);
+            }
+        });
 
         btnOrder.setText("Hóa đơn");
         btnOrder.setBorderPainted(false);
@@ -255,6 +274,11 @@ public class MainForm extends javax.swing.JFrame {
 
         btnBrands.setText("Thương hiệu");
         btnBrands.setBorderPainted(false);
+        btnBrands.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBrandsActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -340,11 +364,13 @@ public class MainForm extends javax.swing.JFrame {
     private void btnTrangchuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTrangchuActionPerformed
         // TODO add your handling code here:
         setHomePage();
+        homePage.reset();
     }//GEN-LAST:event_btnTrangchuActionPerformed
 
     private void btnStaffActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStaffActionPerformed
         // TODO add your handling code here:
         setcustomerCRUD();
+        customerCRUD.reset();
     }//GEN-LAST:event_btnStaffActionPerformed
 
     private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
@@ -356,6 +382,7 @@ public class MainForm extends javax.swing.JFrame {
     private void btnSuppliersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSuppliersActionPerformed
         // TODO add your handling code here:
         setsuppliersCRUD();
+        suppliersCRUD.reset();
     }//GEN-LAST:event_btnSuppliersActionPerformed
 
     private void btnTkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTkActionPerformed
@@ -366,17 +393,19 @@ public class MainForm extends javax.swing.JFrame {
     private void btnOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOrderActionPerformed
         // TODO add your handling code here:
         setOrderForm();
+        ordersForm.reset();
     }//GEN-LAST:event_btnOrderActionPerformed
 
     private void btnNotificationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNotificationActionPerformed
         // TODO add your handling code here:
         setNotificationCRUD();
+        notificationCRUD.reset();
     }//GEN-LAST:event_btnNotificationActionPerformed
 
     private void btnSatisticalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSatisticalActionPerformed
         // TODO add your handling code here:
         setStatisticalCRUD();
-        
+        statisticalCRUD.reset();
     }//GEN-LAST:event_btnSatisticalActionPerformed
 
     private void btnProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProductActionPerformed
@@ -400,7 +429,20 @@ public class MainForm extends javax.swing.JFrame {
             e.printStackTrace(); // In chi tiết lỗi xuống cửa sổ Output bên dưới
             javax.swing.JOptionPane.showMessageDialog(this, "Lỗi không mở được trang Sản phẩm:\n" + e.getMessage());
         }
+        productForm.refreshData();
     }//GEN-LAST:event_btnProductActionPerformed
+
+    private void btnCategoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCategoryActionPerformed
+        // TODO add your handling code here:
+        setcateForm();
+        cateCRUD.reset();
+    }//GEN-LAST:event_btnCategoryActionPerformed
+
+    private void btnBrandsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBrandsActionPerformed
+        // TODO add your handling code here:
+        setbrandsForm();
+        brandFrom.reset();
+    }//GEN-LAST:event_btnBrandsActionPerformed
 
     /**
      * @param args the command line arguments

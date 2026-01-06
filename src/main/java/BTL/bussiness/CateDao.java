@@ -2,78 +2,90 @@ package BTL.bussiness;
 
 import BTL.connect.MyConnection;
 import BTL.entity.Cate;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
+import java.sql.*;
+import java.util.*;
 
-public class CateDao {
+/**
+ * CateDao thực thi Interface Dao<Cate>
+ * @author vanminh
+ */
+public class CateDao implements Dao<Cate> {
+    private final String TABLE_NAME = "categories";
+    MyConnection myConnection = MyConnection.getInstance();
 
-    // ================== 1. LẤY DANH SÁCH ==================
-    public ArrayList<Cate> getAll() {
-        ArrayList<Cate> list = new ArrayList<>();
-        String sql = "SELECT * FROM categories";
-
-        try {
-            Connection conn = MyConnection.getInstance().getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
-
+    @Override
+    public List<Cate> getall() {
+        List<Cate> list = new ArrayList<>();
+        String sql = "SELECT * FROM " + TABLE_NAME;
+        try (Connection conn = myConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                Cate c = new Cate();
-                c.setId(rs.getInt("category_id"));   // ⭐ ĐỔI TÊN CỘT Ở ĐÂY NẾU DB KHÁC
-                c.setName(rs.getString("name"));
-                c.setDescription(rs.getString("description"));
-                list.add(c);
+                // Đảm bảo tên cột trong DB là id, name, description
+                list.add(new Cate(rs.getInt("category_id"), rs.getString("name"), rs.getString("description")));
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
         return list;
     }
 
-    // ================== 2. THÊM ==================
-    public int insert(Cate c) {
-        String sql = "INSERT INTO categories (name, description) VALUES (?, ?)";
-        try {
-            Connection conn = MyConnection.getInstance().getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, c.getName());
-            ps.setString(2, c.getDescription());
-            return ps.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
+    @Override
+    public Optional<Cate> get(int id) {
+        String sql = "SELECT * FROM " + TABLE_NAME + " WHERE category_id= ?";
+        try (Connection conn = myConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(new Cate(rs.getInt("id"), rs.getString("name"), rs.getString("description")));
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return Optional.empty();
     }
 
-    // ================== 3. SỬA ==================
-    public boolean update(Cate c) {
-        String sql = "UPDATE categories SET name = ?, description = ? WHERE category_id = ?";
-        try {
-            Connection conn = MyConnection.getInstance().getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, c.getName());
-            ps.setString(2, c.getDescription());
-            ps.setInt(3, c.getId());
+    @Override
+    public int insert(Cate t) {
+        String sql = "INSERT INTO " + TABLE_NAME + " (name, description) VALUES (?, ?)";
+        try (Connection conn = myConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, t.getName());
+            ps.setString(2, t.getDescription());
+            if (ps.executeUpdate() > 0) {
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return -1;
+    }
+
+    @Override
+    public boolean update(Cate t) {
+        String sql = "UPDATE " + TABLE_NAME + " SET name = ?, description = ? WHERE category_id = ?";
+        try (Connection conn = myConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, t.getName());
+            ps.setString(2, t.getDescription());
+            ps.setInt(3, t.getId());
             return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
         return false;
     }
 
-    // ================== 4. XÓA ==================
+    @Override
+    public boolean delete(Cate t) {
+        return delete(t.getId());
+    }
+
+    @Override
     public boolean delete(int id) {
-        String sql = "DELETE FROM categories WHERE category_id = ?";
-        try {
-            Connection conn = MyConnection.getInstance().getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
+        String sql = "DELETE FROM " + TABLE_NAME + " WHERE category_id = ?";
+        try (Connection conn = myConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
         return false;
     }
+
+    
 }

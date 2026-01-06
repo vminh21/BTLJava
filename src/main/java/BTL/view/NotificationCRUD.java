@@ -37,6 +37,13 @@ public class NotificationCRUD extends javax.swing.JPanel {
         initTableEvent();
         
     }
+    public void reset(){
+        txtTitle.setText("");
+        txtMessage.setText("");
+        dao.delete(selectedId);
+        loadTable();
+        resetForm();
+    }
 
     
 

@@ -4,16 +4,24 @@
  */
 package BTL.view;
 
-import BTL.connect.MyConnection;
+import BTL.bussiness.CateDao;
+import BTL.entity.Cate;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 
 /**
@@ -22,83 +30,109 @@ import javax.swing.SwingConstants;
  */
 public class HomePage extends javax.swing.JPanel {
 
-    // --- 1. KHAI BÁO BIẾN LƯU MAINFORM (QUAN TRỌNG) ---
-    // 1. Thêm dòng này để khai báo biến
     private MainForm mainForm;
     private CustomersForm customersForm;
+    private final CateDao cateDao = new CateDao();
 
-    // 2. Thêm hàm khởi tạo này để nhận MainForm (QUAN TRỌNG)
+    // --- MÀU SẮC CHỦ ĐẠO (Sửa ở đây để đổi màu toàn bộ trang) ---
+    private final Color PRIMARY_COLOR = new Color(0, 102, 204); // Xanh dương đậm
+    private final Color BG_COLOR = new Color(245, 245, 250);    // Xám nhạt (nền)
+    private final Color HOVER_COLOR = new Color(230, 240, 255); // Màu khi rê chuột vào nút
+
     public HomePage(MainForm main) {
         this.mainForm = main;
-        initComponents();
+        initCustomLayout();
         loadCategoryButtons();
     }
 
     public HomePage(CustomersForm customers) {
         this.customersForm = customers;
-        initComponents();
+        initCustomLayout();
         loadCategoryButtons();
     }
 
-    // 3. Giữ nguyên hàm cũ này (để không bị lỗi ở chỗ khác)
     public HomePage() {
-        initComponents();
+        initCustomLayout();
         loadCategoryButtons();
+    }
+
+    // --- HÀM TỰ CẤU HÌNH GIAO DIỆN (Thay thế initComponents mặc định) ---
+    private void initCustomLayout() {
+        this.setLayout(new BorderLayout()); // Layout chính là BorderLayout
+        
+        // 1. TẠO HEADER ĐẸP
+        JPanel pnlHeader = new JPanel();
+        pnlHeader.setBackground(PRIMARY_COLOR);
+        pnlHeader.setPreferredSize(new Dimension(800, 80)); // Chiều cao header
+        pnlHeader.setLayout(new BorderLayout());
+        
+        JLabel lblTitle = new JLabel("CỬA HÀNG CƯỜNG THUẬN", SwingConstants.CENTER);
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        lblTitle.setForeground(Color.WHITE);
+        pnlHeader.add(lblTitle, BorderLayout.CENTER);
+        
+        this.add(pnlHeader, BorderLayout.NORTH); // Gắn Header lên trên cùng
+
+        // 2. TẠO PHẦN CHỨA NÚT (BODY)
+        jPanel1 = new JPanel();
+        jPanel1.setBackground(BG_COLOR);
+        // Padding: Cách lề trên dưới trái phải 20px cho thoáng
+        jPanel1.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); 
+        jPanel1.setLayout(new GridLayout(0, 2, 20, 20)); // Lưới 2 cột, khoảng cách 20
+
+        // 3. TẠO SCROLL PANE
+        jScrollPane2 = new JScrollPane(jPanel1);
+        jScrollPane2.setBorder(null); // Bỏ viền xấu xí mặc định
+        jScrollPane2.getVerticalScrollBar().setUnitIncrement(16); // Cuộn mượt
+        
+        this.add(jScrollPane2, BorderLayout.CENTER); // Gắn Scroll vào giữa
     }
 
     private void loadCategoryButtons() {
         try {
-            // 1. Dọn sạch giao diện cũ (để tránh bị nhân đôi nút khi reload)
             jPanel1.removeAll();
+            List<Cate> list = cateDao.getall();
 
-            // Thiết lập lại Layout: Lưới 2 cột, khoảng cách các nút là 20px
-            jPanel1.setLayout(new GridLayout(0, 2, 20, 20));
+            for (Cate c : list) {
+                // --- THIẾT KẾ NÚT DẠNG THẺ (CARD) ---
+                JButton btn = new JButton();
+                
+                // Dùng HTML để format chữ: Tên to, Mô tả nhỏ xuống dòng
+                String htmlText = "<html><center>"
+                        + "<span style='font-size:16px; color:#333333; font-weight:bold'>" + c.getName().toUpperCase() + "</span><br>"
+                        + "<span style='font-size:10px; color:#666666'><i>" + c.getDescription() + "</i></span>"
+                        + "</center></html>";
+                
+                btn.setText(htmlText);
+                btn.setPreferredSize(new Dimension(200, 150));
+                
+                // Style cho nút
+                btn.setBackground(Color.WHITE);
+                btn.setFocusPainted(false); // Bỏ viền focus khi bấm
+                btn.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220), 1)); // Viền mỏng nhẹ
+                btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-            // 2. Lấy kết nối từ class MyConnection của bạn
-            Connection conn = MyConnection.getInstance().getConnection();
+                // --- HIỆU ỨNG HOVER (RÊ CHUỘT) ---
+                btn.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseEntered(MouseEvent e) {
+                        btn.setBackground(HOVER_COLOR); // Đổi màu nền khi rê vào
+                        btn.setBorder(BorderFactory.createLineBorder(PRIMARY_COLOR, 2)); // Viền đậm lên
+                    }
 
-            if (conn == null) {
-                JOptionPane.showMessageDialog(this, "Lỗi: Không thể kết nối đến Database!");
-                return;
-            }
-
-            // 3. Viết câu lệnh SQL lấy danh mục
-            String sql = "SELECT * FROM categories";
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-
-            // 4. Duyệt qua từng dòng dữ liệu lấy được
-            while (rs.next()) {
-                int catId = rs.getInt("category_id");
-                String catName = rs.getString("name");
-                String desc = rs.getString("description"); // Lấy mô tả để làm tooltip
-
-                // --- Tạo nút bấm ---
-                JButton btn = new JButton(catName);
-
-                // Trang trí nút cho đẹp
-                btn.setFont(new Font("Segoe UI", Font.BOLD, 16));
-                btn.setBackground(new Color(255, 255, 255)); // Màu nền trắng
-                btn.setForeground(new Color(51, 51, 51));    // Màu chữ xám đen
-                btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); // Rê chuột vào hiện bàn tay
-                btn.setToolTipText(desc); // Rê chuột vào hiện mô tả danh mục
-
-                // Gắn icon (nếu bạn muốn, hiện tại để text trước)
-                // btn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/laptop.png")));
-                // --- Gắn sự kiện khi bấm nút ---
-                btn.addActionListener(e -> {
-                    onCategoryClick(catId, catName);
+                    @Override
+                    public void mouseExited(MouseEvent e) {
+                        btn.setBackground(Color.WHITE); // Trả lại màu trắng
+                        btn.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220), 1));
+                    }
                 });
 
-                // Thêm nút vào jPanel1
+                // Sự kiện click
+                btn.addActionListener(e -> onCategoryClick(c.getId(), c.getName()));
+
                 jPanel1.add(btn);
             }
 
-            // 5. Đóng các luồng dữ liệu (Không đóng conn để dùng lại chỗ khác)
-            rs.close();
-            st.close();
-
-            // 6. Lệnh quan trọng: Vẽ lại giao diện
             jPanel1.revalidate();
             jPanel1.repaint();
 
@@ -108,34 +142,34 @@ public class HomePage extends javax.swing.JPanel {
         }
     }
 
-    // ========================================================
-    // HÀM 2: XỬ LÝ KHI BẤM VÀO NÚT DANH MỤC
-    // ========================================================
     private void onCategoryClick(int categoryId, String categoryName) {
         if (customersForm != null) {
-            // Nếu đang ở giao diện khách hàng -> Nhảy sang Shop của khách
             customersForm.showProductByCategory(categoryId, categoryName);
         } else if (mainForm != null) {
-            // Nếu đang ở giao diện Admin -> Nhảy sang Product của Admin
             mainForm.showProductByCategory(categoryId, categoryName);
         } else {
             JOptionPane.showMessageDialog(this, "Lỗi: Không tìm thấy Form kết nối!");
         }
     }
-
+    public void reset(){
+        loadCategoryButtons();
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
-     * regenerated by the Form Editor.
-     */
+     * regenerated by the Form Editor .       */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane2 = new javax.swing.JScrollPane();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
 
+        jScrollPane2.setPreferredSize(new java.awt.Dimension(600, 400));
+
         jPanel1.setLayout(new java.awt.GridLayout(0, 2, 10, 10));
+        jScrollPane2.setViewportView(jPanel1);
 
         jLabel1.setFont(new java.awt.Font("Helvetica", 3, 36)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(0, 0, 255));
@@ -145,19 +179,19 @@ public class HomePage extends javax.swing.JPanel {
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
-                .addGap(111, 111, 111)
+                .addGap(87, 87, 87)
                 .addComponent(jLabel1)
-                .addContainerGap(120, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(40, 40, 40)
+                .addGap(46, 46, 46)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 43, Short.MAX_VALUE)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 500, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 505, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -165,5 +199,6 @@ public class HomePage extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane2;
     // End of variables declaration//GEN-END:variables
 }

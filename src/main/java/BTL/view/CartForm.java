@@ -6,9 +6,8 @@ package BTL.view;
 
 import BTL.bussiness.CartDao;
 import BTL.entity.Users;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.util.List;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -43,41 +42,35 @@ public class CartForm extends javax.swing.JPanel {
         loadCartData(this.currentUserId);
     }
     private void updateTotalAmount() {
-    double total = 0;
-    // Duyệt qua tất cả các dòng hiện có trong JTable
-    for (int i = 0; i < jTable1.getRowCount(); i++) {
-        // Cột 4 là "Thành Tiền" (Chỉ số index là 4 nếu bạn làm theo hướng dẫn trước)
-        double rowTotal = Double.parseDouble(jTable1.getValueAt(i, 4).toString());
-        total += rowTotal;
-    }
-    // Cập nhật giá trị vào biến toàn cục hoặc hiển thị lên một JLabel tổng tiền
-    this.totalCartAmount = total; 
-    // Ví dụ nếu bạn có một cái label hiện tiền:
-    // lblTotal.setText(String.format("%,.0f VNĐ", total));
+        double total = 0;
+        for (int i = 0; i < jTable1.getRowCount(); i++) {
+            double rowTotal = Double.parseDouble(jTable1.getValueAt(i, 4).toString());
+            total += rowTotal;
+        }
+        this.totalCartAmount = total; 
+        // lblTotal.setText(String.format("%,.0f VNĐ", total));
 }
-    // Khai báo CartDao ở đầu class CartForm
     CartDao cartDao = new BTL.bussiness.CartDao();
 
-public void loadCartData(int userId) {
-    tblModel.setRowCount(0);
-    java.util.List<BTL.entity.Cart> list = cartDao.getByUser(userId);
+    public void loadCartData(int userId) {
+            tblModel.setRowCount(0);
+            List<BTL.entity.Cart> list = cartDao.getByUser(userId);
 
-    for (BTL.entity.Cart c : list) {
-        double unitPrice = c.getPrice();
-        int quantity = c.getQuantity();
-        double lineTotal = quantity * unitPrice;
+            for (BTL.entity.Cart c : list) {
+                double unitPrice = c.getPrice();
+                int quantity = c.getQuantity();
+                double lineTotal = quantity * unitPrice;
 
-        // Đảm bảo Object[] có đủ 5 phần tử, phần tử đầu tiên là ID
-        tblModel.addRow(new Object[]{
-            c.getProductId(),   // PHẢI CÓ DÒNG NÀY (Cột index 0)
-            c.getProductName(), // Cột index 1
-            quantity,           // Cột index 2
-            (long)unitPrice,          // Cột index 3
-            (long)lineTotal           // Cột index 4
-        });
-    }
-    updateTotalAmount();
-}
+                tblModel.addRow(new Object[]{
+                    c.getProductId(),
+                    c.getProductName(),
+                    quantity,
+                    (long) unitPrice,
+                    (long) lineTotal
+                });
+            }
+            updateTotalAmount();
+        }
 
 
     /**
@@ -93,7 +86,6 @@ public void loadCartData(int userId) {
         jTable1 = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
         btnadd = new javax.swing.JButton();
-        btnfix = new javax.swing.JButton();
         btndel = new javax.swing.JButton();
 
         setPreferredSize(new java.awt.Dimension(600, 600));
@@ -122,8 +114,6 @@ public void loadCartData(int userId) {
             }
         });
 
-        btnfix.setText("Sửa");
-
         btndel.setText("Xóa");
         btndel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -146,9 +136,7 @@ public void loadCartData(int userId) {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnadd)
-                .addGap(18, 18, 18)
-                .addComponent(btnfix)
-                .addGap(18, 18, 18)
+                .addGap(108, 108, 108)
                 .addComponent(btndel)
                 .addGap(62, 62, 62))
         );
@@ -162,7 +150,6 @@ public void loadCartData(int userId) {
                 .addGap(50, 50, 50)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnadd)
-                    .addComponent(btnfix)
                     .addComponent(btndel))
                 .addContainerGap(120, Short.MAX_VALUE))
         );
@@ -171,29 +158,27 @@ public void loadCartData(int userId) {
     private void btndelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btndelActionPerformed
         // TODO add your handling code here:
         int row = jTable1.getSelectedRow();
-    
-    // 1. Kiểm tra xem đã chọn dòng nào chưa
-    if (row == -1) {
-        javax.swing.JOptionPane.showMessageDialog(this, "Vui lòng chọn sản phẩm cần xóa!");
-        return;
-    }
-
-    // 2. Kiểm tra giá trị tại ô đó có null không trước khi toString()
-    Object value = jTable1.getValueAt(row, 0);
-    if (value == null) {
-        return; // Dòng trống, không xử lý
-    }
-
-    try {
-        int productId = Integer.parseInt(value.toString());
-
-        if (cartDao.deleteByUserAndProduct(currentUserId, productId)) {
-            loadCartData(currentUserId); 
-            javax.swing.JOptionPane.showMessageDialog(this, "Đã xóa thành công!");
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn sản phẩm cần xóa!");
+            return;
         }
-    } catch (NumberFormatException e) {
-        System.out.println("Lỗi định dạng ID: " + e.getMessage());
-    }
+
+        Object value = jTable1.getValueAt(row, 0);
+        if (value == null) return;
+
+        try {
+            int productId = Integer.parseInt(value.toString());
+            int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc muốn xóa sản phẩm này?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+            
+            if (confirm == JOptionPane.YES_OPTION) {
+                if (cartDao.deleteByUserAndProduct(currentUserId, productId)) {
+                    loadCartData(currentUserId);
+                    JOptionPane.showMessageDialog(this, "Đã xóa thành công!");
+                }
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Lỗi định dạng ID: " + e.getMessage());
+        }
     }//GEN-LAST:event_btndelActionPerformed
 
     private void btnaddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnaddActionPerformed
@@ -206,16 +191,36 @@ public void loadCartData(int userId) {
     String address = javax.swing.JOptionPane.showInputDialog(this, "Nhập địa chỉ giao hàng:");
     if (address == null || address.trim().isEmpty()) return;
 
-    // 1. Lấy tên đầy đủ của người dùng từ đối tượng users đã được truyền vào Form
-    // (Đối tượng 'users' này đã được khai báo ở đầu class và gán trong Constructor)
     String customerName = users.getFullName(); 
 
-    // 2. Cập nhật lời gọi hàm: Truyền thêm tham số customerName vào cuối
-    // Cấu trúc mới: checkout(userId, address, method, customerName)
+    // 1. Thực hiện đặt hàng
     boolean success = cartDao.checkout(currentUserId, address, "COD", customerName);
 
     if (success) {
         javax.swing.JOptionPane.showMessageDialog(this, "Đặt hàng thành công!");
+        
+        // 2. LẤY ID ĐƠN HÀNG VỪA TẠO (Quan trọng)
+        // Bạn cần một hàm trong OrdersDao để lấy ID đơn hàng mới nhất của User này
+        BTL.bussiness.OrdersDao ordersDao = new BTL.bussiness.OrdersDao();
+        int newOrderId = -1;
+        
+        // Lấy danh sách đơn hàng của user, tìm cái ID lớn nhất (mới nhất)
+        List<BTL.entity.Orders> userOrders = ordersDao.getall(); // Hoặc viết hàm getByUserId
+        for(BTL.entity.Orders o : userOrders) {
+            if(o.getUserId() == currentUserId && o.getOrderId() > newOrderId) {
+                newOrderId = o.getOrderId();
+            }
+        }
+
+        if (newOrderId != -1) {
+            // 3. CHUYỂN SANG TRANG HÓA ĐƠN VÀ ĐỔ DỮ LIỆU
+            OrderCus invoice = new OrderCus(this.customersForm);
+            invoice.showInvoice(customerName, newOrderId); // Gọi hàm đổ dữ liệu bạn đã viết
+            
+            // Hiển thị lên giao diện chính
+            customersForm.showPanel(invoice, new javax.swing.JButton());
+        }
+
         loadCartData(currentUserId); 
     } else {
         javax.swing.JOptionPane.showMessageDialog(this, "Có lỗi xảy ra khi đặt hàng!");
@@ -226,7 +231,6 @@ public void loadCartData(int userId) {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnadd;
     private javax.swing.JButton btndel;
-    private javax.swing.JButton btnfix;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;

@@ -98,4 +98,36 @@ public class ProductsDao implements Dao<Products> {
         ps.setString(7, t.getDescription());
         ps.setString(8, t.getThumbnail());
     }
+    // ================== THÊM VÀO CUỐI FILE ProductsDao.java ==================
+    
+    // 5. TÌM KIẾM
+    public List<Products> search(String keyword) {
+        List<Products> list = new ArrayList<>();
+        String sql = "SELECT * FROM products WHERE name LIKE ? OR description LIKE ?";
+        try (Connection conn = myConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            String key = "%" + keyword + "%";
+            ps.setString(1, key);
+            ps.setString(2, key);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapResultSetToProduct(rs));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    // 6. LỌC THEO DANH MỤC (Dùng cho HomePage click sang)
+    public List<Products> getByCategory(int catId) {
+        List<Products> list = new ArrayList<>();
+        String sql = "SELECT * FROM products WHERE category_id = ?";
+        try (Connection conn = myConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, catId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapResultSetToProduct(rs));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
 }
+

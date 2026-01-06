@@ -33,6 +33,20 @@ public class StatisticalCRUD extends javax.swing.JPanel {
         lblTongHoaDonValue.setText("0");
         lblTongDoanhThuValue.setText("0 VNĐ");
     }
+    public void reset(){
+        Ngay.setEnabled(true);
+        Thang.setEnabled(true);
+        Nam.setEnabled(true);
+        Ngay.setSelected(true);
+        spnngay.setSelectedIndex(0);
+        spnthang.setSelectedIndex(0);
+        spnnam.setValue(2020); 
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        model.setRowCount(0);
+        lblTongHoaDonValue.setText("0");
+        lblTongDoanhThuValue.setText("0 VNĐ");
+        updateRadioState();
+    }
     
     private void initTable() {
         // Định nghĩa đúng 4 cột: ID, Thời gian, Trạng thái, Doanh thu

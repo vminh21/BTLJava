@@ -4,85 +4,150 @@
  */
 package BTL.view;
 
-import BTL.entity.Session; // Theo import mới của mày
-import BTL.connect.MyConnection;
-import java.sql.*;
-import java.util.Vector;
+import BTL.bussiness.CartDao;
+import BTL.bussiness.CateDao;
+import BTL.bussiness.ProductsDao;
+import BTL.entity.Cate;
+import BTL.entity.Products;
+import BTL.entity.Session; // Import Session để lấy User ID
+import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumnModel;
 
-public class ShopForm extends javax.swing.JPanel { // CHUẨN: Kế thừa JPanel
+public class ShopForm extends javax.swing.JPanel {
 
-   DefaultTableModel model;
-   private CustomersForm customersForm;
+    private DefaultTableModel model;
+    private CustomersForm customersForm;
+    
+    // --- 1. KHAI BÁO 3 DAO CẦN DÙNG ---
+    private final ProductsDao productsDao = new ProductsDao();
+    private final CateDao cateDao = new CateDao();
+    private final CartDao cartDao = new CartDao();
+    
+    // Format tiền tệ cho đẹp (Ví dụ: 15,000,000)
+    private final DecimalFormat df = new DecimalFormat("#,###");
+
+    // --- BÍ KÍP: Map để tra cứu nhanh (ID -> Tên Thể Loại) ---
+    // Cái này thay thế cho việc JOIN bảng trong SQL
+    private Map<Integer, String> categoryMap = new HashMap<>();
+
+    // Constructor chính
     public ShopForm(CustomersForm customersForm) {
         initComponents();
-        this.customersForm= customersForm;
-        setupTable();      // 1. Cấu hình cột
-        loadDataToTable(""); // 2. Đổ dữ liệu
-        setupSearch();     // 3. Tìm kiếm
+        this.customersForm = customersForm;
+        initAll(""); // Load tất cả sản phẩm
     }
     
-    // Constructor hỗ trợ lọc từ HomePage
+    // Constructor hỗ trợ lọc từ HomePage (khi bấm vào danh mục bên ngoài)
     public ShopForm(String categoryName) {
         initComponents();
-        setupTable();
         txtTimkiem.setText(categoryName);
-        loadDataToTable(categoryName);
-        setupSearch();
+        initAll(categoryName);
+    }
+    // Hàm khởi tạo chung
+    private void initAll(String keyword) {
+        loadCategoryMap(); 
+        setupTable();      
+        loadDataToTable(keyword); 
+        setupSearch();     
+        
+        // --- THÊM ĐOẠN NÀY ---
+        // Cấu hình cho ô Mô tả đẹp hơn
+        txtMota.setLineWrap(true);        // Tự động xuống dòng khi hết khung
+        txtMota.setWrapStyleWord(true);   // Ngắt dòng theo từ (không cắt đôi chữ)
+        txtMota.setEditable(false);       // Chỉ cho đọc, không cho người dùng sửa
+        
+        // Gọi hàm bắt sự kiện click chuột
+        setupTableEvents();
+    }
+    // --- BẮT SỰ KIỆN CLICK CHUỘT VÀO BẢNG ---
+    private void setupTableEvents() {
+        jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                // 1. Lấy dòng đang chọn
+                int row = jTable1.getSelectedRow();
+                
+                if (row >= 0) {
+                    // 2. Lấy dữ liệu cột Mô tả (Cột thứ 5 - Index 5)
+                    // Thứ tự cột: 0:ID, 1:Tên, 2:Loại, 3:Giá, 4:Kho, 5:Mô tả
+                    Object motaObj = jTable1.getValueAt(row, 5);
+                    
+                    // 3. Kiểm tra null và hiển thị lên txtMota
+                    if (motaObj != null) {
+                        txtMota.setText(motaObj.toString());
+                    } else {
+                        txtMota.setText("Không có mô tả cho sản phẩm này.");
+                    }
+                    
+                    // (Tùy chọn) Kéo thanh cuộn lên đầu nếu mô tả quá dài
+                    txtMota.setCaretPosition(0);
+                }
+            }
+        });
     }
 
+    // --- Bước 1: Lấy toàn bộ danh mục từ CateDao lưu vào Map ---
+    private void loadCategoryMap() {
+        List<Cate> list = cateDao.getall();
+        for (Cate c : list) {
+            // Lưu cặp: ID là khóa, Tên là giá trị (VD: 1 -> "Laptop")
+            categoryMap.put(c.getId(), c.getName());
+        }
+    }
+
+    // --- Bước 2: Cấu hình bảng ---
     private void setupTable() {
-        // Thứ tự các cột: 0: ID, 1: Tên SP, 2: Thể loại, 3: Giá, 4: Còn lại, 5: Mô tả
+        // Cột: 0:ID, 1:Tên SP, 2:Thể loại, 3:Giá, 4:Kho, 5:Mô tả
         String[] headers = {"ID", "Tên Sản Phẩm", "Thể loại", "Giá (VND)", "Còn lại", "Mô tả"};
         model = new DefaultTableModel(headers, 0) {
             @Override
-            public boolean isCellEditable(int row, int col) { return false; }
+            public boolean isCellEditable(int row, int col) { return false; } // Không cho sửa
         };
         jTable1.setModel(model);
 
-        // Ẩn cột ID (Index 0) để giao diện đẹp nhưng vẫn lấy được ID để mua hàng
+        // Ẩn cột ID (Cột 0) để giao diện đẹp nhưng vẫn lấy được ID để mua hàng
         jTable1.getColumnModel().getColumn(0).setMinWidth(0);
         jTable1.getColumnModel().getColumn(0).setMaxWidth(0);
         jTable1.getColumnModel().getColumn(0).setPreferredWidth(0);
     }
 
+    // --- Bước 3: Đổ dữ liệu sản phẩm (Dùng ProductsDao) ---
     private void loadDataToTable(String keyword) {
         model.setRowCount(0);
         
-        // SQL JOIN: Lấy p.name (Tên SP) và c.name (Tên thể loại)
-        String sql = "SELECT p.product_id, p.name, c.name AS category_name, p.price, p.stock_quantity, p.description " +
-                     "FROM products p " +
-                     "JOIN categories c ON p.category_id = c.category_id " +
-                     "WHERE p.name LIKE ? OR c.name LIKE ?";
-
-        try (Connection conn = MyConnection.getInstance().getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
+        // Gọi DAO tìm kiếm sản phẩm
+        List<Products> list = productsDao.search(keyword);
+        
+        for (Products p : list) {
+            // --- KỸ THUẬT GHÉP TÊN ---
+            // Dựa vào categoryId của sản phẩm, tra trong Map để lấy Tên Thể Loại
+            // Nếu không tìm thấy thì hiện "Khác"
+            String catName = categoryMap.getOrDefault(p.getCategoryId(), "Khác");
             
-            String search = "%" + keyword.trim() + "%";
-            pst.setString(1, search);
-            pst.setString(2, search);
-
-            ResultSet rs = pst.executeQuery();
-            while (rs.next()) {
-                Vector row = new Vector();
-                // PHẢI KHỚP VỚI THỨ TỰ HEADERS Ở TRÊN
-                row.add(rs.getInt("product_id"));       // Index 0
-                row.add(rs.getString("name"));             // Index 1
-                row.add(rs.getString("category_name"));    // Index 2
-                row.add(rs.getBigDecimal("price"));        // Index 3
-                row.add(rs.getInt("stock_quantity"));      // Index 4
-                row.add(rs.getString("description"));       // Index 5
-                
-                model.addRow(row);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Lỗi load bảng: " + e.getMessage());
+            model.addRow(new Object[]{
+                p.getProductId(),
+                p.getName(),
+                catName,             // Hiển thị Tên loại (Laptop) chứ không phải số (1)
+                df.format(p.getPrice()), // Format giá
+                p.getStockQuantity(),
+                p.getDescription()
+            });
         }
+    }
+
+    // --- Bước 4: Sự kiện tìm kiếm ---
+    private void setupSearch() {
+        txtTimkiem.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { loadDataToTable(txtTimkiem.getText()); }
+            public void removeUpdate(DocumentEvent e) { loadDataToTable(txtTimkiem.getText()); }
+            public void changedUpdate(DocumentEvent e) { loadDataToTable(txtTimkiem.getText()); }
+        });
     }
 
     /**
@@ -100,6 +165,8 @@ public class ShopForm extends javax.swing.JPanel { // CHUẨN: Kế thừa JPane
         btnThem = new javax.swing.JButton();
         txtTimkiem = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        txtMota = new javax.swing.JTextArea();
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -127,6 +194,10 @@ public class ShopForm extends javax.swing.JPanel { // CHUẨN: Kế thừa JPane
 
         jLabel2.setText("Tìm kiếm:");
 
+        txtMota.setColumns(20);
+        txtMota.setRows(5);
+        jScrollPane2.setViewportView(txtMota);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -143,7 +214,10 @@ public class ShopForm extends javax.swing.JPanel { // CHUẨN: Kế thừa JPane
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(txtTimkiem, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(225, 225, 225)
+                        .addGap(174, 174, 174)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(219, 219, 219)
                         .addComponent(btnThem)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -158,111 +232,59 @@ public class ShopForm extends javax.swing.JPanel { // CHUẨN: Kế thừa JPane
                     .addComponent(jLabel2))
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(86, 86, 86)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(32, 32, 32)
                 .addComponent(btnThem)
-                .addContainerGap(129, Short.MAX_VALUE))
+                .addContainerGap(86, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnThemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThemActionPerformed
-        // 1. LẤY ID TỪ KHO SESSION (Đã sửa lại chỗ này)
-
+    // 1. Lấy ID người dùng
         int currentUserId = Session.userId;
-
-        // Kiểm tra xem đã đăng nhập chưa
         if (currentUserId == 0) {
-
-            JOptionPane.showMessageDialog(this, "Bạn chưa đăng nhập! Không thể mua hàng.");
-
+            JOptionPane.showMessageDialog(this, "Bạn chưa đăng nhập!");
             return;
-
         }
 
+        // 2. Kiểm tra chọn dòng
         int selectedRow = jTable1.getSelectedRow();
-
         if (selectedRow == -1) {
-
             JOptionPane.showMessageDialog(this, "Vui lòng chọn sản phẩm!");
-
             return;
-
         }
 
+        // 3. Lấy thông tin sản phẩm
         int productId = Integer.parseInt(jTable1.getValueAt(selectedRow, 0).toString());
-
         String productName = jTable1.getValueAt(selectedRow, 1).toString();
+        
+        // Lấy số lượng tồn kho (Cột index 4)
+        int stock = Integer.parseInt(jTable1.getValueAt(selectedRow, 4).toString());
 
-        int stock = (int) Double.parseDouble(jTable1.getValueAt(selectedRow, 3).toString());
-
+        // 4. Kiểm tra tồn kho
         if (stock <= 0) {
-
-            JOptionPane.showMessageDialog(this, "Hết hàng rồi!");
-
+            JOptionPane.showMessageDialog(this, "Sản phẩm này tạm hết hàng!");
             return;
-
         }
 
-        try {
-
-            Connection conn = MyConnection.getInstance().getConnection();
-
-            // 2. Kiểm tra DB
-            String checkSql = "SELECT quantity FROM cart WHERE user_id = ? AND product_id = ?";
-
-            PreparedStatement checkPst = conn.prepareStatement(checkSql);
-
-            checkPst.setInt(1, currentUserId); // Dùng ID lấy từ Session
-
-            checkPst.setInt(2, productId);
-
-            ResultSet rs = checkPst.executeQuery();
-
-            if (rs.next()) {
-
-                String updateSql = "UPDATE cart SET quantity = quantity + 1 WHERE user_id = ? AND product_id = ?";
-
-                PreparedStatement updatePst = conn.prepareStatement(updateSql);
-
-                updatePst.setInt(1, currentUserId);
-
-                updatePst.setInt(2, productId);
-
-                updatePst.executeUpdate();
-
-            } else {
-
-                String insertSql = "INSERT INTO cart(user_id, product_id, quantity) VALUES (?, ?, ?)";
-
-                PreparedStatement insertPst = conn.prepareStatement(insertSql);
-
-                insertPst.setInt(1, currentUserId);
-
-                insertPst.setInt(2, productId);
-
-                insertPst.setInt(3, 1);
-
-                insertPst.executeUpdate();
-
-            }
-
+        // 5. Thêm vào giỏ hàng
+        if (cartDao.addToCart(currentUserId, productId, 1)) {
             JOptionPane.showMessageDialog(this, "Đã thêm '" + productName + "' vào giỏ hàng!");
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            JOptionPane.showMessageDialog(this, "Lỗi: " + e.getMessage());
-
+            
+            // --- ĐOẠN CODE MỚI: TRỪ SỐ LƯỢNG TRÊN BẢNG ---
+            // Cập nhật lại ô số lượng (Cột 4) thành stock - 1
+            jTable1.setValueAt(stock - 1, selectedRow, 4);
+            
+            // (Tùy chọn) Nếu muốn bảng đẹp hơn, mày có thể cập nhật lại biến model
+            // model.setValueAt(stock - 1, selectedRow, 4);
+            // ----------------------------------------------
+            
+        } else {
+            JOptionPane.showMessageDialog(this, "Lỗi hệ thống! Không thể thêm vào giỏ.");
         }
     }//GEN-LAST:event_btnThemActionPerformed
 
-    private void setupSearch() {
-        txtTimkiem.getDocument().addDocumentListener(new DocumentListener() {
-            public void insertUpdate(DocumentEvent e) { loadDataToTable(txtTimkiem.getText()); }
-            public void removeUpdate(DocumentEvent e) { loadDataToTable(txtTimkiem.getText()); }
-            public void changedUpdate(DocumentEvent e) { loadDataToTable(txtTimkiem.getText()); }
-        });
-    }
     /**
      * @param args the command line arguments
      */
@@ -271,7 +293,9 @@ public class ShopForm extends javax.swing.JPanel { // CHUẨN: Kế thừa JPane
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTable1;
+    private javax.swing.JTextArea txtMota;
     private javax.swing.JTextField txtTimkiem;
     // End of variables declaration//GEN-END:variables
 }

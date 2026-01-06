@@ -44,7 +44,31 @@ public class SuppliersDao implements Dao<Suppliers> {
         } catch (Exception e) { e.printStackTrace(); }
         return Optional.empty();
     }
-
+    //Kiểm tra email
+    public Optional<Suppliers> get(String email) {
+        String sql = "SELECT * FROM " + TABLE_NAME + " WHERE email = ?";
+        try (Connection conn = myConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, email);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Suppliers s = new Suppliers(
+                        rs.getInt("supplier_id"), 
+                        rs.getString("name"), 
+                        rs.getString("phone_number"), 
+                        rs.getString("email"), 
+                        rs.getString("address")
+                    );
+                    return Optional.of(s);
+                }
+            }
+        } catch (Exception e) { 
+            e.printStackTrace(); 
+        }
+        return Optional.empty();
+    }
     @Override
     public int insert(Suppliers t) {
         String sql = "INSERT INTO " + TABLE_NAME + " (name, phone_number, email, address) VALUES (?,?,?,?)";
@@ -84,7 +108,7 @@ public class SuppliersDao implements Dao<Suppliers> {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
-        } catch (Exception e) { // Ném lỗi vào RuntimeException để View (Giao diện) có thể bắt được
+        } catch (Exception e) { 
         throw new RuntimeException(e); }
     }
 }

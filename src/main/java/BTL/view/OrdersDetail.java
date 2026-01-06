@@ -4,6 +4,7 @@
  */
 package BTL.view;
 import BTL.connect.MyConnection;
+import BTL.verify.NumberVerify;
 import java.sql.*;
 import java.util.Vector;
 import javax.swing.JOptionPane;
@@ -23,6 +24,7 @@ public class OrdersDetail extends javax.swing.JDialog {
     public OrdersDetail(java.awt.Frame parent, boolean modal, int orderId) {
         super(parent, modal);
         initComponents();
+        txtSoLuong.setInputVerifier(new NumberVerify());
         this.currentOrderId = orderId;
         initTable();
         loadProducts();
@@ -63,14 +65,13 @@ public class OrdersDetail extends javax.swing.JDialog {
 
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
-        jTextField1 = new javax.swing.JTextField();
+        txtSoLuong = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         btnadd = new javax.swing.JButton();
         btncancel = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(400, 400));
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -120,7 +121,7 @@ public class OrdersDetail extends javax.swing.JDialog {
                         .addGap(83, 83, 83)
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtSoLuong, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(119, 119, 119)
                         .addComponent(jLabel2)))
@@ -135,7 +136,7 @@ public class OrdersDetail extends javax.swing.JDialog {
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(37, 37, 37)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtSoLuong, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1))
                 .addGap(15, 15, 15)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -149,53 +150,54 @@ public class OrdersDetail extends javax.swing.JDialog {
 
     private void btnaddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnaddActionPerformed
         // TODO add your handling code here:
-        int row = jTable1.getSelectedRow();
-if (row == -1) {
-    JOptionPane.showMessageDialog(this, "Vui lòng chọn 1 sản phẩm!");
-    return;
-}
+    int row = jTable1.getSelectedRow();
+    if (row == -1) {
+        JOptionPane.showMessageDialog(this, "Vui lòng chọn 1 sản phẩm!");
+        return;
+    }
 
-try {
-    int productId = (int) jTable1.getValueAt(row, 0);
-    double price = Double.parseDouble(jTable1.getValueAt(row, 2).toString());
-    int quantity = Integer.parseInt(jTextField1.getText());
+    try {
+        // Lấy dữ liệu từ giao diện
+        int productId = (int) jTable1.getValueAt(row, 0);
+        double price = Double.parseDouble(jTable1.getValueAt(row, 2).toString());
+        int stockAvailable = (int) jTable1.getValueAt(row, 3);
+        
+        if (txtSoLuong.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập số lượng!");
+            return;
+        }
+        
+        int quantity = Integer.parseInt(txtSoLuong.getText());
 
-    Connection conn = MyConnection.getInstance().getConnection();
-    
-    // 1. Chèn vào bảng order_details dùng đúng cột price_at_purchase
-    String sql = "INSERT INTO order_details (order_id, product_id, quantity, price_at_purchase) VALUES (?, ?, ?, ?)";
-    PreparedStatement ps = conn.prepareStatement(sql);
-    ps.setInt(1, currentOrderId);
-    ps.setInt(2, productId);
-    ps.setInt(3, quantity);
-    ps.setDouble(4, price);
-    ps.executeUpdate();
+        // Kiểm tra nghiệp vụ: số lượng mua không được vượt quá kho
+        if (quantity > stockAvailable) {
+            JOptionPane.showMessageDialog(this, "Kho không đủ hàng! Hiện có: " + stockAvailable);
+            return;
+        }
+        if (quantity <= 0) {
+            JOptionPane.showMessageDialog(this, "Số lượng phải lớn hơn 0!");
+            return;
+        }
 
-    // 2. CẬP NHẬT TỔNG TIỀN VÀO BẢNG ORDERS (Thêm đoạn này vào đây)
-    String sqlUpdateTotal = "UPDATE orders SET total_amount = (" +
-                            "  SELECT SUM(quantity * price_at_purchase) " +
-                            "  FROM order_details " +
-                            "  WHERE order_id = ?" +
-                            ") WHERE order_id = ?";
-    PreparedStatement psUpdate = conn.prepareStatement(sqlUpdateTotal);
-    psUpdate.setInt(1, currentOrderId);
-    psUpdate.setInt(2, currentOrderId);
-    psUpdate.executeUpdate();
+        // Sử dụng DAO để thực hiện nghiệp vụ
+        BTL.bussiness.OrderDetailsDao dao = new BTL.bussiness.OrderDetailsDao();
+        BTL.entity.OrderDetails detail = new BTL.entity.OrderDetails(0, currentOrderId, productId, quantity, price);
 
-    // 3. Thông báo và làm mới dữ liệu
-    JOptionPane.showMessageDialog(this, "Đã thêm sản phẩm và cập nhật tổng tiền!");
-    
-    // Nếu bạn có hàm làm mới ở form chính, hãy gọi nó trước khi dispose
-    // Ví dụ: parentForm.loadProductsByOrderId(currentOrderId);
-    //        parentForm.loadListNames();
-    
-    this.dispose(); 
-} catch (NumberFormatException e) {
-    JOptionPane.showMessageDialog(this, "Số lượng phải là số nguyên!");
-} catch (Exception e) {
-    e.printStackTrace();
-    JOptionPane.showMessageDialog(this, "Lỗi: " + e.getMessage());
-}
+        int result = dao.insert(detail);
+
+        if (result != -1) {
+            JOptionPane.showMessageDialog(this, "Thêm sản phẩm thành công!");
+            this.dispose(); // Đóng cửa sổ sau khi thêm thành công
+        } else {
+            JOptionPane.showMessageDialog(this, "Thêm thất bại. Vui lòng kiểm tra lại hệ thống!");
+        }
+
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(this, "Số lượng phải là số nguyên!");
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Lỗi: " + e.getMessage());
+    }
     }//GEN-LAST:event_btnaddActionPerformed
 
     /**
@@ -242,6 +244,6 @@ try {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField txtSoLuong;
     // End of variables declaration//GEN-END:variables
 }

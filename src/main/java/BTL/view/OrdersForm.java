@@ -3,9 +3,11 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
 package BTL.view;
+import BTL.bussiness.OrdersDao;
 import BTL.connect.MyConnection;
 import BTL.entity.Orders;
 import java.sql.*;
+import java.util.List;
 import java.util.Vector;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -32,16 +34,27 @@ public class OrdersForm extends javax.swing.JPanel {
             jList1ValueChanged(evt);
         }
     });
+}
+    public void reset(){
+        jTextField1.setText("");
+        jTextField2.setText("");
+        jTextField3.setText("");
+        jComboBox1.setSelectedIndex(0);
+        jComboBox2.setSelectedIndex(0);
+        jTable1.clearSelection();
+        jList1.clearSelection();    
+        initTable();
+        loadData();
     }
     private void initTable() {
-    tblModel = new DefaultTableModel();
-    tblModel.setColumnIdentifiers(new String[]{"Mã ĐH", "Tên Khách", "Tổng Tiền", "Trạng Thái", "Địa Chỉ", "Thanh Toán"});
-    jTable1.setModel(tblModel);
-}
+        tblModel = new DefaultTableModel();
+        tblModel.setColumnIdentifiers(new String[]{"Mã ĐH", "Tên Khách", "Tổng Tiền", "Trạng Thái", "Địa Chỉ", "Thanh Toán"});
+        jTable1.setModel(tblModel);
+    }
     private void loadData() {
     tblModel.setRowCount(0);
     try {
-        Connection conn = MyConnection.getInstance().getConnection(); //
+        Connection conn = MyConnection.getInstance().getConnection();
         String sql = "SELECT * FROM orders";
         Statement st = conn.createStatement();
         ResultSet rs = st.executeQuery(sql);
@@ -49,7 +62,6 @@ public class OrdersForm extends javax.swing.JPanel {
         Vector row = new Vector();
         row.add(rs.getInt("order_id")); 
         row.add(rs.getString("name")); 
-    // Dùng String.valueOf hoặc format để đảm bảo tiền tệ hiển thị đúng dạng chuỗi
         row.add(String.format("%,.0f", rs.getDouble("total_amount"))); 
         row.add(rs.getString("status")); 
         row.add(rs.getString("shipping_address")); 
@@ -61,92 +73,49 @@ public class OrdersForm extends javax.swing.JPanel {
     }
     }
     private void initComboBox() {
-    // 1. Đổ dữ liệu cho Trạng Thái (jComboBox1)
-    jComboBox1.removeAllItems();
-    jComboBox1.addItem("pending");
-    jComboBox1.addItem("confirmed");
-    jComboBox1.addItem("shipping");
-    jComboBox1.addItem("delivered");
-    jComboBox1.addItem("cancelled");
+        jComboBox1.removeAllItems();
+        jComboBox1.addItem("pending");
+        jComboBox1.addItem("confirmed");
+        jComboBox1.addItem("shipping");
+        jComboBox1.addItem("delivered");
+        jComboBox1.addItem("cancelled");
 
-    // 2. Đổ dữ liệu cho Hình Thức Thanh Toán (jComboBox2)
-    jComboBox2.removeAllItems();
-    jComboBox2.addItem("COD");
-    jComboBox2.addItem("Banking");
-}
+        jComboBox2.removeAllItems();
+        jComboBox2.addItem("COD");
+        jComboBox2.addItem("Banking");
+    }
     private void loadListNames() {
-    javax.swing.DefaultListModel<Orders> listModel = new javax.swing.DefaultListModel<>();
-    try {
-        Connection conn = MyConnection.getInstance().getConnection();
-        String sql = "SELECT * FROM orders ORDER BY order_id DESC"; 
-        Statement st = conn.createStatement();
-        ResultSet rs = st.executeQuery(sql);
-        while (rs.next()) {
-    Orders order = new Orders();
-    order.setOrderId(rs.getInt("order_id"));
-    order.setUserId(rs.getInt("user_id"));
-    
-    // PHẢI CÓ DÒNG NÀY: Nạp tên khách hàng vào đối tượng
-    order.setName(rs.getString("name")); 
-    
-    // Nạp đúng địa chỉ vào shippingAddress
-    order.setShippingAddress(rs.getString("shipping_address")); 
-    
-    order.setTotalAmount(rs.getDouble("total_amount"));
-    order.setStatus(rs.getString("status"));
-    order.setPaymentMethod(rs.getString("payment_method"));
-    
-    listModel.addElement(order);
-}
-// Ép kiểu chuẩn để hết gạch đỏ ở setModel
-jList1.setModel((javax.swing.ListModel<String>)(Object)listModel);
-    } catch (Exception e) { e.printStackTrace(); }
-}
+        javax.swing.DefaultListModel<Orders> listModel = new javax.swing.DefaultListModel<>();
+        OrdersDao dao = new OrdersDao();
+        List<Orders> orders = dao.getAllOrdersDesc();
+        for (Orders o : orders) {
+            listModel.addElement(o);
+        }
+        jList1.setModel((javax.swing.ListModel<String>)(Object)listModel);
+    }
     private void jList1ValueChanged(javax.swing.event.ListSelectionEvent evt) {
     if (!evt.getValueIsAdjusting()) {
         Object selected = jList1.getSelectedValue();
         if (selected instanceof Orders) {
-            Orders s = (Orders) selected;
-            
-            // Gán đúng thuộc tính vào đúng JTextField
-            jTextField1.setText(s.getName());            // Ô Họ Tên
-            jTextField3.setText(s.getShippingAddress()); // Ô Địa Chỉ (Chuẩn địa chỉ từ DB)
-            jTextField2.setText(String.format("%.0f", s.getTotalAmount())); // Ô Số Tiền
-            
+            Orders s = (Orders) selected;           
+            jTextField1.setText(s.getName());            
+            jTextField3.setText(s.getShippingAddress()); 
+            jTextField2.setText(String.format("%.0f", s.getTotalAmount()));            
             jComboBox1.setSelectedItem(s.getStatus());
-            jComboBox2.setSelectedItem(s.getPaymentMethod());
-            
-            // Gọi hàm tải sản phẩm với ID duy nhất
+            jComboBox2.setSelectedItem(s.getPaymentMethod());           
             loadProductsByOrderId(s.getOrderId());
         }
     }
 }
     private void loadProductsByOrderId(int id) {
-    tblModel.setColumnIdentifiers(new String[]{"Tên Sản Phẩm", "Số Lượng", "Đơn Giá", "Thành Tiền"});
-    tblModel.setRowCount(0);
-    try {
-        Connection conn = MyConnection.getInstance().getConnection();
-        // Sửa od.price thành od.price_at_purchase
-        String sql = "SELECT p.name, od.quantity, od.price_at_purchase " +
-                     "FROM order_details od " +
-                     "JOIN products p ON od.product_id = p.product_id " +
-                     "WHERE od.order_id = ?";
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setInt(1, id);
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            Vector row = new Vector();
-            row.add(rs.getString(1));
-            row.add(rs.getInt(2));
-            double price = rs.getDouble(3); 
-            row.add(String.format("%,.0f", price));
-            row.add(String.format("%,.0f", rs.getInt(2) * price));
+        tblModel.setColumnIdentifiers(new String[]{"Tên Sản Phẩm", "Số Lượng", "Đơn Giá", "Thành Tiền"});
+        tblModel.setRowCount(0);
+        OrdersDao dao = new OrdersDao();
+        List<Vector> data = dao.getProductDetailsByOrderId(id);
+        for (Vector row : data) {
             tblModel.addRow(row);
         }
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this, "Lỗi truy vấn: " + e.getMessage());
     }
-}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -383,104 +352,69 @@ jList1.setModel((javax.swing.ListModel<String>)(Object)listModel);
     private void btnconfirmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnconfirmActionPerformed
         // TODO add your handling code here:
         int selectedRow = jTable1.getSelectedRow();
-    
-    if (selectedRow == -1) {
-        javax.swing.JOptionPane.showMessageDialog(this, "Vui lòng chọn một hóa đơn từ bảng trước!");
-        return;
-    }
 
-    try {
-        // Lấy ID hóa đơn từ cột đầu tiên (cột 0) của dòng đang chọn
-        int idDonHang = Integer.parseInt(jTable1.getValueAt(selectedRow, 0).toString());
+        if (selectedRow == -1) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Vui lòng chọn một hóa đơn từ bảng trước!");
+            return;
+        }
+        try {
+            // Lấy ID hóa đơn từ cột đầu tiên (cột 0) của dòng đang chọn
+            int idDonHang = Integer.parseInt(jTable1.getValueAt(selectedRow, 0).toString());
+            OrdersDetail detailDialog = new OrdersDetail(null, true, idDonHang);
+            detailDialog.setLocationRelativeTo(null);
+            detailDialog.setVisible(true);
+            loadData(); 
 
-        // Mở Dialog và truyền ID sang
-        // 'null' có thể thay bằng Frame cha nếu bạn đang chạy từ một JFrame
-        OrdersDetail detailDialog = new OrdersDetail(null, true, idDonHang);
-        detailDialog.setLocationRelativeTo(null); // Hiển thị giữa màn hình
-        detailDialog.setVisible(true);
-        
-        // Sau khi đóng dialog, load lại bảng để cập nhật tổng tiền (nếu cần)
-        loadData(); 
-        
-    } catch (Exception e) {
-        javax.swing.JOptionPane.showMessageDialog(this, "Lỗi khi mở chi tiết: " + e.getMessage());
-    }
-    // --- KẾT THÚC DÁN ---
+        } catch (Exception e) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Lỗi khi mở chi tiết: " + e.getMessage());
+        }
     }//GEN-LAST:event_btnconfirmActionPerformed
 
     private void btnaddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnaddActionPerformed
         // TODO add your handling code here:
         try {
-        Connection conn = MyConnection.getInstance().getConnection();
-        String sql = "INSERT INTO orders (name, total_amount, status, shipping_address, payment_method) VALUES (?, ?, ?, ?, ?)";
-        PreparedStatement ps = conn.prepareStatement(sql);
-        
-        // Lấy tên từ ô nhập liệu (jTextField1)
-        ps.setString(1, jTextField1.getText()); 
-        
-        ps.setDouble(2, Double.parseDouble(jTextField2.getText()));
-        
-        // Lấy giá trị đã chọn từ ComboBox
-        ps.setString(3, jComboBox1.getSelectedItem().toString()); 
-        
-        ps.setString(4, jTextField3.getText());
-        ps.setString(5, jComboBox2.getSelectedItem().toString());
-        
-        ps.executeUpdate();
-        JOptionPane.showMessageDialog(this, "Thêm hóa đơn thành column thành công!");
-        loadData();
+        Orders order = new Orders();
+        order.setName(jTextField1.getText());
+        order.setTotalAmount(Double.parseDouble(jTextField2.getText()));
+        order.setStatus(jComboBox1.getSelectedItem().toString());
+        order.setShippingAddress(jTextField3.getText());
+        order.setPaymentMethod(jComboBox2.getSelectedItem().toString());
+        // Giả sử user_id mặc định là 1 hoặc lấy từ session
+        order.setUserId(1); 
+
+        OrdersDao dao = new OrdersDao();
+        if (dao.insert(order) != -1) {
+            JOptionPane.showMessageDialog(this, "Thêm hóa đơn thành công!");
+            loadData();
+            loadListNames();
+        }
     } catch (Exception e) {
-        JOptionPane.showMessageDialog(this, "Lỗi: " + e.getMessage());
+        JOptionPane.showMessageDialog(this, "Lỗi! Vui lòng nhập thông tin đầy đủ!");
     }
     }//GEN-LAST:event_btnaddActionPerformed
 
     private void btnfixActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnfixActionPerformed
         // TODO add your handling code here:
-        try {
-        // 1. Khai báo và lấy giá trị từ JList
-        Object selectedValue = jList1.getSelectedValue(); 
-        
-        // 2. Kiểm tra nếu chưa chọn gì
-        if (selectedValue == null) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn một hóa đơn từ danh sách!");
-            return;
-        }
+        Object selectedValue = jList1.getSelectedValue();
+    if (!(selectedValue instanceof Orders)) {
+        JOptionPane.showMessageDialog(this, "Vui lòng chọn một hóa đơn từ danh sách!");
+        return;
+    }
 
-        // 3. Khai báo biến selectedOrder bằng cách ép kiểu chuẩn
-        // Lưu ý: JList phải được nạp bằng DefaultListModel<Orders> thì mới ép kiểu được
-        Orders selectedOrder = (Orders) selectedValue; 
+    try {
+        Orders selectedOrder = (Orders) selectedValue;
+        selectedOrder.setName(jTextField1.getText());
+        selectedOrder.setTotalAmount(Double.parseDouble(jTextField2.getText()));
+        selectedOrder.setShippingAddress(jTextField3.getText());
+        selectedOrder.setStatus(jComboBox1.getSelectedItem().toString());
+        selectedOrder.setPaymentMethod(jComboBox2.getSelectedItem().toString());
 
-        // 4. Lấy dữ liệu từ giao diện
-        int orderId = selectedOrder.getOrderId(); // Bây giờ biến selectedOrder đã tồn tại
-        String name = jTextField1.getText();
-        String totalStr = jTextField2.getText().trim();
-        
-        if (totalStr.isEmpty()) {
-            throw new NumberFormatException("Empty");
-        }
-        
-        double totalAmount = Double.parseDouble(totalStr);
-        String address = jTextField3.getText();
-        String status = jComboBox1.getSelectedItem().toString();
-        String payment = jComboBox2.getSelectedItem().toString();
-
-        // 5. Thực thi SQL Update
-        Connection conn = MyConnection.getInstance().getConnection();
-        String sql = "UPDATE orders SET name=?, total_amount=?, status=?, shipping_address=?, payment_method=? WHERE order_id=?";
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setString(1, name);
-        ps.setDouble(2, totalAmount);
-        ps.setString(3, status);
-        ps.setString(4, address);
-        ps.setString(5, payment);
-        ps.setInt(6, orderId);
-
-        if (ps.executeUpdate() > 0) {
+        OrdersDao dao = new OrdersDao();
+        if (dao.update(selectedOrder)) {
             JOptionPane.showMessageDialog(this, "Cập nhật thành công!");
-            loadListNames(); // Làm mới danh sách để thấy thay đổi
+            loadData();
+            loadListNames();
         }
-    } catch (NumberFormatException e) {
-        JOptionPane.showMessageDialog(this, "Số tiền không hợp lệ hoặc bị trống!");
     } catch (Exception e) {
         e.printStackTrace();
     }
@@ -489,26 +423,33 @@ jList1.setModel((javax.swing.ListModel<String>)(Object)listModel);
     private void btndelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btndelActionPerformed
         // TODO add your handling code here:
         int selectedRow = jTable1.getSelectedRow();
-    if (selectedRow == -1) {
-        JOptionPane.showMessageDialog(this, "Vui lòng chọn hóa đơn cần xóa!");
-        return;
-    }
-    
-    int confirm = JOptionPane.showConfirmDialog(this, "Xóa hóa đơn này sẽ xóa tất cả chi tiết liên quan. Bạn chắc chứ?");
-    if (confirm == JOptionPane.YES_OPTION) {
-        try {
-            int orderId = Integer.parseInt(jTable1.getValueAt(selectedRow, 0).toString());
-            Connection conn = MyConnection.getInstance().getConnection();
-            String sql = "DELETE FROM orders WHERE order_id = ?";
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, orderId);
-            ps.executeUpdate();
-            loadData();
-            btnresetActionPerformed(evt);
-        } catch (Exception e) {
-            e.printStackTrace();
+        Object selectedInList = jList1.getSelectedValue();
+
+        int orderId = -1;
+        if (selectedInList instanceof Orders) {
+            orderId = ((Orders) selectedInList).getOrderId();
+        } else if (selectedRow != -1) {
+            orderId = Integer.parseInt(jTable1.getValueAt(selectedRow, 0).toString());
         }
-    }
+
+        if (orderId == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn hóa đơn cần xóa!");
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa hóa đơn này?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            OrdersDao dao = new OrdersDao();
+            if (dao.delete(orderId)) {
+                JOptionPane.showMessageDialog(this, "Xóa thành công!");
+
+                loadData();      
+                loadListNames(); 
+                btnresetActionPerformed(evt);
+            } else {
+                JOptionPane.showMessageDialog(this, "Xóa thất bại!");
+            }
+        }
     }//GEN-LAST:event_btndelActionPerformed
 
     private void btnresetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnresetActionPerformed
@@ -519,11 +460,9 @@ jList1.setModel((javax.swing.ListModel<String>)(Object)listModel);
         jComboBox1.setSelectedIndex(0);
         jComboBox2.setSelectedIndex(0);
         jTable1.clearSelection();
-        jList1.clearSelection();
-    
-        // Quay lại hiển thị danh sách hóa đơn ban đầu
-        initTable(); // Reset lại các cột (Mã ĐH, Tên Khách...)
-        loadData();  // Tải lại toàn bộ hóa đơn
+        jList1.clearSelection();    
+        initTable();
+        loadData();
     }//GEN-LAST:event_btnresetActionPerformed
 
     private void jTextField3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField3ActionPerformed

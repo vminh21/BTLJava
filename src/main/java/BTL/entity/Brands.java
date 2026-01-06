@@ -1,37 +1,32 @@
 package BTL.entity;
 
+/**
+ * Entity Brands chuẩn hóa để chạy với BrandsDao (Generic Dao)
+ */
 public class Brands {
-    private int brand_id; // Hoặc private int id;
+    private int brandId; // Dùng lạc đà (camelCase) cho chuẩn Java
     private String name;
     private String origin;
 
     public Brands() {
     }
 
-    public Brands(int brand_id, String name, String origin) {
-        this.brand_id = brand_id;
+    public Brands(int brandId, String name, String origin) {
+        this.brandId = brandId;
         this.name = name;
         this.origin = origin;
     }
 
-    // Quan trọng: DAO gọi hàm này
-    public int getBrand_id() { 
-        return brand_id; 
-    }
-    
-    // Nếu bạn dùng getId() thì sửa DAO thành .getId() nhé
-    public int getId() {
-        return brand_id;
+    // ⭐ Hàm quan trọng nhất: Phải khớp với gọi lệnh trong BrandsDao.update
+    public int getBrandId() {
+        return brandId;
     }
 
-    public void setBrand_id(int brand_id) {
-        this.brand_id = brand_id;
-    }
-    
-    public void setId(int id) {
-        this.brand_id = id;
+    public void setBrandId(int brandId) {
+        this.brandId = brandId;
     }
 
+    // Các hàm getter/setter còn lại
     public String getName() {
         return name;
     }
@@ -46,5 +41,10 @@ public class Brands {
 
     public void setOrigin(String origin) {
         this.origin = origin;
+    }
+
+    @Override
+    public String toString() {
+        return "Brands{" + "brandId=" + brandId + ", name=" + name + ", origin=" + origin + '}';
     }
 }

@@ -24,6 +24,9 @@ public class TrangchuCRUD extends javax.swing.JPanel {
         showNewsFeed();
         txtThongbao.setEnabled(false);
     }
+    public void reset(){
+    showNewsFeed();
+    }
     private void showNewsFeed() {
         // 1. Tạo Model để chứa dữ liệu đối tượng Notification
         DefaultListModel<Notification> model = new DefaultListModel<>();

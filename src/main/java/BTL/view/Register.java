@@ -6,6 +6,11 @@ package BTL.view;
 
 import BTL.bussiness.UsersDao;
 import BTL.entity.Users;
+import BTL.verify.EmailVerify;
+import BTL.verify.NumberVerify;
+import BTL.verify.StringVerify;
+import javax.crypto.NullCipher;
+import javax.swing.InputVerifier;
 import javax.swing.JOptionPane;
 
 /**
@@ -17,6 +22,9 @@ public class Register extends javax.swing.JPanel {
     private final LoginForm loginForm;
     public Register(LoginForm loginForm) {
         initComponents();
+        txtName.setInputVerifier(new StringVerify());
+        txtPhone.setInputVerifier(new NumberVerify());
+        txtEmail.setInputVerifier(new EmailVerify());
         initAddressData();
         this.loginForm = loginForm;
     }
@@ -40,10 +48,6 @@ public class Register extends javax.swing.JPanel {
         rbtNam.setSelected(true);
         cbxAddress.removeAllItems();
     }
-    public boolean isValidEmail(String email) {
-    String emailRegex = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
-    return email.matches(emailRegex);
-}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -254,11 +258,6 @@ public class Register extends javax.swing.JPanel {
         JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ các thông tin bắt buộc!");
         return;
     }
-    else if (!isValidEmail(email)) {
-        JOptionPane.showMessageDialog(this, "Email không đúng định dạng (ví dụ: abc@gmail.com)!");
-        txtEmail.requestFocus();
-        return;
-    }
     else if (usersDao.get(email).isPresent()) {
         JOptionPane.showMessageDialog(this, "Email này đã được sử dụng, vui lòng chọn email khác!");
         txtEmail.requestFocus();
@@ -269,7 +268,7 @@ public class Register extends javax.swing.JPanel {
         return;
     }
 
-    Users newUser = new Users(0,name, email, password, phone, address, gender);
+    Users newUser = Users.createCustomer(0, name, email, password, phone, address, gender);
     int result = usersDao.insert(newUser);
 
     if (result > 0) {

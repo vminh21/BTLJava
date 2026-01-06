@@ -25,6 +25,7 @@ public class CustomersForm extends javax.swing.JFrame {
     private ShopForm shopForm;
     private TrangchuCRUD trangchuCRUD;
     private CartForm cartForm;
+    private OrderCus orderCus;
     public CustomersForm(Users user) {
         this.currentUser = user;
         initComponents();
@@ -33,7 +34,7 @@ public class CustomersForm extends javax.swing.JFrame {
         this.setResizable(false);
         this.setLocationRelativeTo(null);
     }
-    private void showPanel(JPanel panel, JButton btn) {
+    public void showPanel(JPanel panel, JButton btn) {
         resetbtn();
         btn.setBackground(new Color(77, 120, 204));
         jplfill2.removeAll();
@@ -62,14 +63,17 @@ public class CustomersForm extends javax.swing.JFrame {
     }
     public void setCartForm(){
         if (cartForm == null) {
-        // TRƯỚC: cartForm = new CartForm(this); (Thiếu tham số)
-        // SAU: Truyền cả form cha và user hiện tại vào
         cartForm = new CartForm(this, this.currentUser); 
     } else {
-        // Mỗi lần mở lại Giỏ hàng, nên load lại data mới nhất từ DB
         cartForm.loadCartData(this.currentUser.getUserId());
     }
-    showPanel(cartForm, btnCart);
+    showPanel(cartForm, btnCart1);
+    }
+    public void setOrdeCus(){
+        if(orderCus == null){
+            orderCus = new OrderCus(this);
+        }
+        showPanel(orderCus, btnod);
     }
     private void checkPermissions() {
         String role = currentUser.getRole().trim();
@@ -81,9 +85,10 @@ public class CustomersForm extends javax.swing.JFrame {
     }
     public void resetbtn(){
         btnTrangchu.setBackground(new Color(255,255,255));
-        btnCart.setBackground(new Color(255,255,255));
+        btnod.setBackground(new Color(255,255,255));
         btnProduct.setBackground(new Color(255,255,255));
         btnTk.setBackground(new Color(255,255,255));
+        btnCart1.setBackground(new Color(255,255,255));
     }
     public void showProductByCategory(int catId, String catName) {
         // Tạo ShopForm mới và truyền tên danh mục vào để nó tự lọc
@@ -105,12 +110,13 @@ public class CustomersForm extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         btnTrangchu = new javax.swing.JButton();
         btnProduct = new javax.swing.JButton();
-        btnCart = new javax.swing.JButton();
+        btnod = new javax.swing.JButton();
         btnLogout = new javax.swing.JButton();
         txtName = new javax.swing.JTextField();
         txtRole = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         btnTk = new javax.swing.JButton();
+        btnCart1 = new javax.swing.JButton();
         jplfill2 = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -137,11 +143,11 @@ public class CustomersForm extends javax.swing.JFrame {
             }
         });
 
-        btnCart.setText("Giỏ hàng");
-        btnCart.setBorderPainted(false);
-        btnCart.addActionListener(new java.awt.event.ActionListener() {
+        btnod.setText("Hóa đơn chi tiết");
+        btnod.setBorderPainted(false);
+        btnod.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCartActionPerformed(evt);
+                btnodActionPerformed(evt);
             }
         });
 
@@ -175,13 +181,21 @@ public class CustomersForm extends javax.swing.JFrame {
             }
         });
 
+        btnCart1.setText("Giỏ hàng");
+        btnCart1.setBorderPainted(false);
+        btnCart1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCart1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(btnTrangchu, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(btnProduct, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(btnCart, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnod, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(btnLogout, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(btnTk, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
@@ -192,6 +206,7 @@ public class CustomersForm extends javax.swing.JFrame {
                     .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE)
                     .addComponent(txtRole))
                 .addContainerGap())
+            .addComponent(btnCart1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -207,8 +222,10 @@ public class CustomersForm extends javax.swing.JFrame {
                 .addComponent(btnTrangchu, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(8, 8, 8)
+                .addComponent(btnCart1, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnCart, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnod, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnTk, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -252,6 +269,7 @@ public class CustomersForm extends javax.swing.JFrame {
     private void btnTrangchuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTrangchuActionPerformed
         // TODO add your handling code here:
         setTrangChu();
+        trangchuCRUD.reset();
     }//GEN-LAST:event_btnTrangchuActionPerformed
 
     private void btnProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProductActionPerformed
@@ -259,10 +277,15 @@ public class CustomersForm extends javax.swing.JFrame {
         setProductForm();
     }//GEN-LAST:event_btnProductActionPerformed
 
-    private void btnCartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCartActionPerformed
+    private void btnodActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnodActionPerformed
+        // TODO add your handling code here:
+        setOrdeCus();
+    }//GEN-LAST:event_btnodActionPerformed
+
+    private void btnCart1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCart1ActionPerformed
         // TODO add your handling code here:
         setCartForm();
-    }//GEN-LAST:event_btnCartActionPerformed
+    }//GEN-LAST:event_btnCart1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -275,11 +298,12 @@ public class CustomersForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnCart;
+    private javax.swing.JButton btnCart1;
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnProduct;
     private javax.swing.JButton btnTk;
     private javax.swing.JButton btnTrangchu;
+    private javax.swing.JButton btnod;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jplfill2;

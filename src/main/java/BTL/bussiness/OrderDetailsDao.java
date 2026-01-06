@@ -44,20 +44,54 @@ public class OrderDetailsDao implements Dao<OrderDetails> {
         return Optional.empty();
     }
 
+    // Trong lớp OrderDetailsDao
     @Override
     public int insert(OrderDetails t) {
-        String sql = "INSERT INTO " + TABLE_NAME + " (order_id, product_id, quantity, price_at_purchase) VALUES (?,?,?,?)";
-        try (Connection conn = myConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setInt(1, t.getOrderId());
-            ps.setInt(2, t.getProductId());
-            ps.setInt(3, t.getQuantity());
-            ps.setDouble(4, t.getPriceAtPurchase());
-            if (ps.executeUpdate() > 0) {
-                ResultSet rs = ps.getGeneratedKeys();
-                if (rs.next()) return rs.getInt(1);
+        String sqlInsert = "INSERT INTO " + TABLE_NAME + " (order_id, product_id, quantity, price_at_purchase) VALUES (?,?,?,?)";
+        String sqlUpdateStock = "UPDATE products SET stock_quantity = stock_quantity - ? WHERE product_id = ?";
+        String sqlUpdateTotal = "UPDATE orders SET total_amount = (SELECT SUM(quantity * price_at_purchase) FROM order_details WHERE order_id = ?) WHERE order_id = ?";
+
+        Connection conn = null;
+        try {
+            conn = myConnection.getConnection();
+            conn.setAutoCommit(false); // Bắt đầu Transaction
+
+            // 1. Thêm chi tiết đơn hàng
+            try (PreparedStatement ps = conn.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS)) {
+                ps.setInt(1, t.getOrderId());
+                ps.setInt(2, t.getProductId());
+                ps.setInt(3, t.getQuantity());
+                ps.setDouble(4, t.getPriceAtPurchase());
+
+                if (ps.executeUpdate() > 0) {
+                    // 2. Cập nhật kho
+                    try (PreparedStatement psStock = conn.prepareStatement(sqlUpdateStock)) {
+                        psStock.setInt(1, t.getQuantity());
+                        psStock.setInt(2, t.getProductId());
+                        psStock.executeUpdate();
+                    }
+
+                    // 3. Cập nhật tổng tiền đơn hàng
+                    try (PreparedStatement psTotal = conn.prepareStatement(sqlUpdateTotal)) {
+                        psTotal.setInt(1, t.getOrderId());
+                        psTotal.setInt(2, t.getOrderId());
+                        psTotal.executeUpdate();
+                    }
+
+                    ResultSet rs = ps.getGeneratedKeys();
+                    if (rs.next()) {
+                        int generatedId = rs.getInt(1);
+                        conn.commit(); // Lưu tất cả thay đổi
+                        return generatedId;
+                    }
+                }
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            if (conn != null) try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            e.printStackTrace();
+        } finally {
+            if (conn != null) try { conn.setAutoCommit(true); conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+        }
         return -1;
     }
 
